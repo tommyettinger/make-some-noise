@@ -3662,11 +3662,11 @@ public class Noise implements Serializable {
 
     private final float[] m = {0, 0, 0, 0, 0, 0}, cellDist = {0, 0, 0, 0, 0, 0};
     private final int[] distOrder = {0, 0, 0, 0, 0, 0}, intLoc = {0, 0, 0, 0, 0, 0};
-    
+
     private static final float
             F6 = (float) ((Math.sqrt(7.0) - 1.0) / 6.0),
             G6 = F6 / (1f + 6f * F6),
-            LIMIT6 = 0.75f;
+            LIMIT6 = 0.8375f;
 
 
     public float singleSimplex(int seed, float x, float y, float z, float w, float u, float v) {
@@ -3674,9 +3674,6 @@ public class Noise implements Serializable {
 
         final int skewX = fastFloor(x + s), skewY = fastFloor(y + s), skewZ = fastFloor(z + s),
                 skewW = fastFloor(w + s), skewU = fastFloor(u + s), skewV = fastFloor(v + s);
-//        final float[] m = mShared, cellDist = cellDistShared;
-//        final float[] gradient6DLUT = Noise.gradient6DLUT;
-//        final int[] distOrder = distOrderShared, intLoc = intLocShared;
         intLoc[0] = skewX;
         intLoc[1] = skewY;
         intLoc[2] = skewZ;
@@ -3736,7 +3733,7 @@ public class Noise implements Serializable {
             }
             skewOffset += G6;
         }
-        return 13.5f * n;
+        return 7.5f * n;
 
     }
 
@@ -4408,25 +4405,25 @@ public class Noise implements Serializable {
         }
     }
 
-    public void GradientPerturb3(float[] v3) {
-        SingleGradientPerturb3(seed, gradientPerturbAmp, frequency, v3);
+    public void gradientPerturb3(float[] v3) {
+        singleGradientPerturb3(seed, gradientPerturbAmp, frequency, v3);
     }
 
-    public void GradientPerturbFractal3(float[] v3) {
+    public void gradientPerturbFractal3(float[] v3) {
         int seed = this.seed;
         float amp = gradientPerturbAmp * fractalBounding;
         float freq = frequency;
 
-        SingleGradientPerturb3(seed, amp, frequency, v3);
+        singleGradientPerturb3(seed, amp, frequency, v3);
 
         for (int i = 1; i < octaves; i++) {
             freq *= lacunarity;
             amp *= gain;
-            SingleGradientPerturb3(++seed, amp, freq, v3);
+            singleGradientPerturb3(++seed, amp, freq, v3);
         }
     }
 
-    private void SingleGradientPerturb3(int seed, float perturbAmp, float frequency, float[] v3) {
+    private void singleGradientPerturb3(int seed, float perturbAmp, float frequency, float[] v3) {
         float xf = v3[0] * frequency;
         float yf = v3[1] * frequency;
         float zf = v3[2] * frequency;
@@ -4495,25 +4492,25 @@ public class Noise implements Serializable {
         v3[2] += lerp(lz0y, lerp(lz0x, lz1x, ys), zs) * perturbAmp;
     }
 
-    public void GradientPerturb2(float[] v2) {
-        SingleGradientPerturb2(seed, gradientPerturbAmp, frequency, v2);
+    public void gradientPerturb2(float[] v2) {
+        singleGradientPerturb2(seed, gradientPerturbAmp, frequency, v2);
     }
 
-    public void GradientPerturbFractal2(float[] v2) {
+    public void gradientPerturbFractal2(float[] v2) {
         int seed = this.seed;
         float amp = gradientPerturbAmp * fractalBounding;
         float freq = frequency;
 
-        SingleGradientPerturb2(seed, amp, frequency, v2);
+        singleGradientPerturb2(seed, amp, frequency, v2);
 
         for (int i = 1; i < octaves; i++) {
             freq *= lacunarity;
             amp *= gain;
-            SingleGradientPerturb2(++seed, amp, freq, v2);
+            singleGradientPerturb2(++seed, amp, freq, v2);
         }
     }
 
-    private void SingleGradientPerturb2(int seed, float perturbAmp, float frequency, float[] v2) {
+    private void singleGradientPerturb2(int seed, float perturbAmp, float frequency, float[] v2) {
         float xf = v2[0] * frequency;
         float yf = v2[1] * frequency;
 
