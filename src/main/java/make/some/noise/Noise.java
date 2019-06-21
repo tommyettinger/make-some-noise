@@ -998,11 +998,15 @@ public class Noise implements Serializable {
         return r;
     }
     
-    //TODO: Configured noise is not set up for 6D
     public float getNoiseWithSeed(float x, float y, float z, float w, float u, float v, int seed) {
-        return singleSimplex(seed, x, y, z, w, u, v);
+        final int s = this.seed;
+        this.seed = seed;
+        float r = getConfiguredNoise(x, y, z, w, u, v);
+        this.seed = s;
+        return r;
     }
 
+    // takes slightly less storage than an array of float[2]
     private static class Float2 {
         public final float x, y;
 
@@ -1012,6 +1016,7 @@ public class Noise implements Serializable {
         }
     }
 
+    // takes slightly less storage than an array of float[3]
     private static class Float3 {
         public final float x, y, z;
 
@@ -1172,47 +1177,20 @@ public class Noise implements Serializable {
         fractalBounding = 1 / ampFractal;
     }
 
-    // Hashing
-    private final static int X_PRIME = 0xB4C4D;
-    private final static int Y_PRIME = 0xEE2C1;
-    private final static int Z_PRIME = 0xA7E07;
-    private final static int W_PRIME = 0x8F19B;
-    //public static int randomize8(final int state) {return Integer.rotateLeft((state ^ state >>> 13) * ((state & 0xFFFF8) ^ 0x277B5), 7) - state >>> 24;}
-    //public static int randomize6(final int state) {return Integer.rotateLeft((state ^ state >>> 13) * ((state & 0xFFFF8) ^ 0x277B5), 7) - state >>> 26;}
-    //public static int randomize5(final int state) {return Integer.rotateLeft((state ^ state >>> 13) * ((state & 0xFFFF8) ^ 0x277B5), 7) - state >>> 27;}
-    //public static int randomize4(final int state) {return Integer.rotateLeft((state ^ state >>> 13) * ((state & 0xFFFF8) ^ 0x277B5), 7) - state >>> 28;}
-
-    private static int hash2D(int seed, int x, int y) {
-        return Integer.rotateLeft(((seed ^= X_PRIME * x ^ Y_PRIME * y) ^ seed >>> 13) * ((seed & 0xFFFF8) ^ 0x277B5), 7) - seed >>> 24;
-//        return (seed = ((seed ^= X_PRIME * x ^ Y_PRIME * y) ^ (seed >>> 25)) * (seed | 0xA529L)) ^ (seed >>> 22);
-    }
-
-    private static int hash3D(int seed, int x, int y, int z) {
-        return Integer.rotateLeft(((seed ^= X_PRIME * x ^ Y_PRIME * y ^ Z_PRIME * z) ^ seed >>> 13) * ((seed & 0xFFFF8) ^ 0x277B5), 7) - seed >>> 24;
-//        return (seed = ((seed ^= X_PRIME * x ^ Y_PRIME * y ^ Z_PRIME * z) ^ (seed >>> 25)) * (seed | 0xA529L)) ^ (seed >>> 22);
-    }
-
-    private static int hash4D(int seed, int x, int y, int z, int w) {
-        return Integer.rotateLeft(((seed ^= X_PRIME * x ^ Y_PRIME * y ^ Z_PRIME * z ^ W_PRIME * w) ^ seed >>> 13) * ((seed & 0xFFFF8) ^ 0x277B5), 7) - seed >>> 24;
-//        return (seed = ((seed ^= X_PRIME * x ^ Y_PRIME * y ^ Z_PRIME * z ^ W_PRIME * w) ^ (seed >>> 25)) * (seed | 0xA529L)) ^ (seed >>> 22);
-    }
-
     private static float valCoord2D(int seed, int x, int y) {
         return (hashAll(x, y, seed) & 0xFFFFFF) * 0x1.0p-24f;
-//        final int n = (seed ^ X_PRIME * x ^ Y_PRIME * y) >> 12;
-//        return ((n * n ^ n * 0xEC4D ^ seed) & 0xFFFFFF) * 0x1.0p-24f;
     }
 
     private static float valCoord3D(int seed, int x, int y, int z) {
         return (hashAll(x, y, z, seed) & 0xFFFFFF) * 0x1.0p-24f;
-//        final int n = (seed ^ X_PRIME * x ^ Y_PRIME * y ^ Z_PRIME * z) >> 12;
-//        return ((n * n ^ n * 0xEC4D ^ seed) & 0xFFFFFF) * 0x1.0p-24f;
     }
 
     private static float valCoord4D(int seed, int x, int y, int z, int w) {
         return (hashAll(x, y, z, w, seed) & 0xFFFFFF) * 0x1.0p-24f;
-//        final int n = (seed ^ X_PRIME * x ^ Y_PRIME * y ^ Z_PRIME * z ^ W_PRIME * w) >> 12;
-//        return ((n * n ^ n * 0xEC4D ^ seed) & 0xFFFFFF) * 0x1.0p-24f;
+    }
+
+    private static float valCoord6D(int seed, int x, int y, int z, int w, int u, int v) {
+        return (hashAll(x, y, z, w, u, v, seed) & 0xFFFFFF) * 0x1.0p-24f;
     }
 
     protected static float gradCoord2D(int seed, int x, int y, float xd, float yd) {
@@ -1372,7 +1350,6 @@ public class Noise implements Serializable {
                 return singleSimplex(seed, x, y);
         }
     }
-
     /**
      * After being configured with the setters in this class, such as {@link #setNoiseType(int)},
      * {@link #setFrequency(float)}, {@link #setFractalOctaves(int)}, and {@link #setFractalType(int)}, among others,
@@ -1380,7 +1357,7 @@ public class Noise implements Serializable {
      * @param x
      * @param y
      * @param z
-     * @param w 
+     * @param w
      * @return noise as a float from -1f to 1f
      */
     public float getConfiguredNoise(float x, float y, float z, float w) {
@@ -1437,6 +1414,64 @@ public class Noise implements Serializable {
         }
     }
 
+    /**
+     * After being configured with the setters in this class, such as {@link #setNoiseType(int)},
+     * {@link #setFrequency(float)}, {@link #setFractalOctaves(int)}, and {@link #setFractalType(int)}, among others,
+     * you can call this method to get the particular variety of noise you specified, in 3D.
+     * @param x
+     * @param y
+     * @param z
+     * @param w
+     * @param u
+     * @param v
+     * @return noise as a float from -1f to 1f
+     */
+    public float getConfiguredNoise(float x, float y, float z, float w, float u, float v) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+        w *= frequency;
+        u *= frequency;
+        v *= frequency;
+
+        switch (noiseType) {
+//            case VALUE:
+//                return singleValue(seed, x, y, z, w, u, v);
+//            case VALUE_FRACTAL:
+//                switch (fractalType) {
+//                    case BILLOW:
+//                        return singleValueFractalBillow(x, y, z, w, u, v);
+//                    case RIDGED_MULTI:
+//                        return singleValueFractalRidgedMulti(x, y, z, w, u, v);
+//                    default:
+//                        return singleValueFractalFBM(x, y, z, w, u, v);
+//                }
+//            case WHITE_NOISE:
+//                return getWhiteNoise(x, y, z, w, u, v);
+//            case PERLIN:
+//                return singlePerlin(seed, x, y, z, w, u, v);
+            case PERLIN_FRACTAL:
+//                switch (fractalType) {
+//                    case BILLOW:
+//                        return singlePerlinFractalBillow(x, y, z, w, u, v);
+//                    case RIDGED_MULTI:
+//                        return singlePerlinFractalRidgedMulti(x, y, z, w, u, v);
+//                    default:
+//                        return singlePerlinFractalFBM(x, y, z, w, u, v);
+//                }
+            case SIMPLEX_FRACTAL:
+                switch (fractalType) {
+                    case BILLOW:
+                        return singleSimplexFractalBillow(x, y, z, w, u, v);
+                    case RIDGED_MULTI:
+                        return singleSimplexFractalRidgedMulti(x, y, z, w, u, v);
+                    default:
+                        return singleSimplexFractalFBM(x, y, z, w, u, v);
+                }
+            default:
+                return singleSimplex(seed, x, y, z, w, u, v);
+        }
+    }
 
     // White Noise
 
@@ -3708,6 +3743,85 @@ public class Noise implements Serializable {
     public float getSimplex(float x, float y, float z, float w, float u, float v) {
         return singleSimplex(seed, x * frequency, y * frequency, z * frequency, w * frequency, u * frequency, v * frequency);
     }
+    // Simplex Noise
+    public float getSimplexFractal(float x, float y, float z, float w, float u, float v) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+        w *= frequency;
+        u *= frequency;
+        v *= frequency;
+
+        switch (fractalType) {
+            case FBM:
+                return singleSimplexFractalFBM(x, y, z, w, u, v);
+            case BILLOW:
+                return singleSimplexFractalBillow(x, y, z, w, u, v);
+            case RIDGED_MULTI:
+                return singleSimplexFractalRidgedMulti(x, y, z, w, u, v);
+            default:
+                return 0;
+        }
+    }
+
+    private float singleSimplexFractalFBM(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = singleSimplex(seed, x, y, z, w, u, v);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += singleSimplex(seed + i, x, y, z, w, u, v) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+    private float singleSimplexFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = 1 - Math.abs(singleSimplex(seed, x, y, z, w, u, v));
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y, z, w, u, v))) * amp;
+        }
+
+        return sum;
+    }
+
+    private float singleSimplexFractalBillow(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = Math.abs(singleSimplex(seed, x, y, z, w, u, v)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleSimplex(seed + i, x, y, z, w, u, v)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
 
     // Cubic Noise
     public float getCubicFractal(float x, float y, float z) {
@@ -3966,7 +4080,7 @@ public class Noise implements Serializable {
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
                         for (int zi = zr - 1; zi <= zr + 1; zi++) {
-                            Float3 vec = CELL_3D[hash3D(seed, xi, yi, zi)];
+                            Float3 vec = CELL_3D[hash256(xi, yi, zi, seed)];
 
                             float vecX = xi - x + vec.x;
                             float vecY = yi - y + vec.y;
@@ -3988,7 +4102,7 @@ public class Noise implements Serializable {
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
                         for (int zi = zr - 1; zi <= zr + 1; zi++) {
-                            Float3 vec = CELL_3D[hash3D(seed, xi, yi, zi)];
+                            Float3 vec = CELL_3D[hash256(xi, yi, zi, seed)];
 
                             float vecX = xi - x + vec.x;
                             float vecY = yi - y + vec.y;
@@ -4010,7 +4124,7 @@ public class Noise implements Serializable {
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
                         for (int zi = zr - 1; zi <= zr + 1; zi++) {
-                            Float3 vec = CELL_3D[hash3D(seed, xi, yi, zi)];
+                            Float3 vec = CELL_3D[hash256(xi, yi, zi, seed)];
 
                             float vecX = xi - x + vec.x;
                             float vecY = yi - y + vec.y;
@@ -4035,7 +4149,7 @@ public class Noise implements Serializable {
                 return valCoord3D(0, xc, yc, zc);
 
             case NOISE_LOOKUP:
-                Float3 vec = CELL_3D[hash3D(seed, xc, yc, zc)];
+                Float3 vec = CELL_3D[hash256(xc, yc, zc, seed)];
                 return cellularNoiseLookup.getConfiguredNoise(xc + vec.x, yc + vec.y, zc + vec.z);
 
             case DISTANCE:
@@ -4058,7 +4172,7 @@ public class Noise implements Serializable {
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
                         for (int zi = zr - 1; zi <= zr + 1; zi++) {
-                            Float3 vec = CELL_3D[hash3D(seed, xi, yi, zi)];
+                            Float3 vec = CELL_3D[hash256(xi, yi, zi, seed)];
 
                             float vecX = xi - x + vec.x;
                             float vecY = yi - y + vec.y;
@@ -4076,7 +4190,7 @@ public class Noise implements Serializable {
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
                         for (int zi = zr - 1; zi <= zr + 1; zi++) {
-                            Float3 vec = CELL_3D[hash3D(seed, xi, yi, zi)];
+                            Float3 vec = CELL_3D[hash256(xi, yi, zi, seed)];
 
                             float vecX = xi - x + vec.x;
                             float vecY = yi - y + vec.y;
@@ -4094,7 +4208,7 @@ public class Noise implements Serializable {
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
                         for (int zi = zr - 1; zi <= zr + 1; zi++) {
-                            Float3 vec = CELL_3D[hash3D(seed, xi, yi, zi)];
+                            Float3 vec = CELL_3D[hash256(xi, yi, zi, seed)];
 
                             float vecX = xi - x + vec.x;
                             float vecY = yi - y + vec.y;
@@ -4154,7 +4268,7 @@ public class Noise implements Serializable {
             case EUCLIDEAN:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
-                        Float2 vec = CELL_2D[hash2D(seed, xi, yi)];
+                        Float2 vec = CELL_2D[hash256(xi, yi, seed)];
 
                         float vecX = xi - x + vec.x;
                         float vecY = yi - y + vec.y;
@@ -4172,7 +4286,7 @@ public class Noise implements Serializable {
             case MANHATTAN:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
-                        Float2 vec = CELL_2D[hash2D(seed, xi, yi)];
+                        Float2 vec = CELL_2D[hash256(xi, yi, seed)];
 
                         float vecX = xi - x + vec.x;
                         float vecY = yi - y + vec.y;
@@ -4190,7 +4304,7 @@ public class Noise implements Serializable {
             case NATURAL:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
-                        Float2 vec = CELL_2D[hash2D(seed, xi, yi)];
+                        Float2 vec = CELL_2D[hash256(xi, yi, seed)];
 
                         float vecX = xi - x + vec.x;
                         float vecY = yi - y + vec.y;
@@ -4212,7 +4326,7 @@ public class Noise implements Serializable {
                 return valCoord2D(0, xc, yc);
 
             case NOISE_LOOKUP:
-                Float2 vec = CELL_2D[hash2D(seed, xc, yc)];
+                Float2 vec = CELL_2D[hash256(xc, yc, seed)];
                 return cellularNoiseLookup.getConfiguredNoise(xc + vec.x, yc + vec.y);
 
             case DISTANCE:
@@ -4234,7 +4348,7 @@ public class Noise implements Serializable {
             case EUCLIDEAN:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
-                        Float2 vec = CELL_2D[hash2D(seed, xi, yi)];
+                        Float2 vec = CELL_2D[hash256(xi, yi, seed)];
 
                         float vecX = xi - x + vec.x;
                         float vecY = yi - y + vec.y;
@@ -4249,7 +4363,7 @@ public class Noise implements Serializable {
             case MANHATTAN:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
-                        Float2 vec = CELL_2D[hash2D(seed, xi, yi)];
+                        Float2 vec = CELL_2D[hash256(xi, yi, seed)];
 
                         float vecX = xi - x + vec.x;
                         float vecY = yi - y + vec.y;
@@ -4264,7 +4378,7 @@ public class Noise implements Serializable {
             case NATURAL:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     for (int yi = yr - 1; yi <= yr + 1; yi++) {
-                        Float2 vec = CELL_2D[hash2D(seed, xi, yi)];
+                        Float2 vec = CELL_2D[hash256(xi, yi, seed)];
 
                         float vecX = xi - x + vec.x;
                         float vecY = yi - y + vec.y;
@@ -4344,15 +4458,15 @@ public class Noise implements Serializable {
                 break;
         }
 
-        Float3 vec0 = CELL_3D[hash3D(seed, x0, y0, z0)];
-        Float3 vec1 = CELL_3D[hash3D(seed, x1, y0, z0)];
+        Float3 vec0 = CELL_3D[hash256(x0, y0, z0, seed)];
+        Float3 vec1 = CELL_3D[hash256(x1, y0, z0, seed)];
 
         float lx0x = lerp(vec0.x, vec1.x, xs);
         float ly0x = lerp(vec0.y, vec1.y, xs);
         float lz0x = lerp(vec0.z, vec1.z, xs);
 
-        vec0 = CELL_3D[hash3D(seed, x0, y1, z0)];
-        vec1 = CELL_3D[hash3D(seed, x1, y1, z0)];
+        vec0 = CELL_3D[hash256(x0, y1, z0, seed)];
+        vec1 = CELL_3D[hash256(x1, y1, z0, seed)];
 
         float lx1x = lerp(vec0.x, vec1.x, xs);
         float ly1x = lerp(vec0.y, vec1.y, xs);
@@ -4362,15 +4476,15 @@ public class Noise implements Serializable {
         float ly0y = lerp(ly0x, ly1x, ys);
         float lz0y = lerp(lz0x, lz1x, ys);
 
-        vec0 = CELL_3D[hash3D(seed, x0, y0, z1)];
-        vec1 = CELL_3D[hash3D(seed, x1, y0, z1)];
+        vec0 = CELL_3D[hash256(x0, y0, z1, seed)];
+        vec1 = CELL_3D[hash256(x1, y0, z1, seed)];
 
         lx0x = lerp(vec0.x, vec1.x, xs);
         ly0x = lerp(vec0.y, vec1.y, xs);
         lz0x = lerp(vec0.z, vec1.z, xs);
 
-        vec0 = CELL_3D[hash3D(seed, x0, y1, z1)];
-        vec1 = CELL_3D[hash3D(seed, x1, y1, z1)];
+        vec0 = CELL_3D[hash256(x0, y1, z1, seed)];
+        vec1 = CELL_3D[hash256(x1, y1, z1, seed)];
 
         lx1x = lerp(vec0.x, vec1.x, xs);
         ly1x = lerp(vec0.y, vec1.y, xs);
@@ -4425,20 +4539,183 @@ public class Noise implements Serializable {
                 break;
         }
 
-        Float2 vec0 = CELL_2D[hash2D(seed, x0, y0)];
-        Float2 vec1 = CELL_2D[hash2D(seed, x1, y0)];
+        Float2 vec0 = CELL_2D[hash256(x0, y0, seed)];
+        Float2 vec1 = CELL_2D[hash256(x1, y0, seed)];
 
         float lx0x = lerp(vec0.x, vec1.x, xs);
         float ly0x = lerp(vec0.y, vec1.y, xs);
 
-        vec0 = CELL_2D[hash2D(seed, x0, y1)];
-        vec1 = CELL_2D[hash2D(seed, x1, y1)];
+        vec0 = CELL_2D[hash256(x0, y1, seed)];
+        vec1 = CELL_2D[hash256(x1, y1, seed)];
 
         float lx1x = lerp(vec0.x, vec1.x, xs);
         float ly1x = lerp(vec0.y, vec1.y, xs);
 
         v2[0] += lerp(lx0x, lx1x, ys) * perturbAmp;
         v2[1] += lerp(ly0x, ly1x, ys) * perturbAmp;
+    }
+    /**
+     * Produces 1D noise that "tiles" by repeating
+     * its output every {@code sizeX} units that {@code x} increases or decreases by. This doesn't precalculate an
+     * array, instead calculating just one value so that later calls with different x will tile seamlessly.
+     * <br>
+     * Internally, this just samples out of a circle from a source of 2D noise.
+     * @param x the x-coordinate to sample
+     * @param sizeX the range of x to generate before repeating; must be greater than 0
+     * @param seed the noise seed, as a long
+     * @return continuous noise from -1.0 to 1.0, inclusive 
+     */
+    public float seamless1D(float x, float sizeX, int seed)
+    {
+        x /= sizeX;
+        return getNoiseWithSeed(cosTurns(x), sinTurns(x), seed);
+    }
+
+    /**
+     * Produces 2D noise that tiles every {@code sizeX} units on the x-axis and {@code sizeY} units on the y-axis.
+     * @param x the x-coordinate to sample
+     * @param y the y-coordinate to sample
+     * @param sizeX the range of x to generate before repeating; must be greater than 0
+     * @param sizeY the range of y to generate before repeating; must be greater than 0
+     * @param seed the noise seed, as a long
+     * @return continuous noise from -1.0 to 1.0, inclusive 
+     */
+    public float seamless2D(float x, float y, float sizeX, float sizeY, int seed)
+    {
+        x /= sizeX;
+        y /= sizeY;
+        return getNoiseWithSeed(cosTurns(x), sinTurns(x), cosTurns(y), sinTurns(y), seed);
+    }
+
+
+    /**
+     * Produces 3D noise that tiles every {@code sizeX} units on the x-axis, {@code sizeY} units on the y-axis, and
+     * every {@code sizeZ} units on the z-axis.
+     * @param x the x-coordinate to sample
+     * @param y the y-coordinate to sample
+     * @param z the z-coordinate to sample
+     * @param sizeX the range of x to generate before repeating; must be greater than 0
+     * @param sizeY the range of y to generate before repeating; must be greater than 0
+     * @param sizeZ the range of z to generate before repeating; must be greater than 0
+     * @param seed the noise seed, as a long
+     * @return continuous noise from -1.0 to 1.0, inclusive 
+     */
+    public float seamless3D(float x, float y, float z, float sizeX, float sizeY, float sizeZ, int seed)
+    {
+        x /= sizeX;
+        y /= sizeY;
+        z /= sizeZ;
+        return getNoiseWithSeed(cosTurns(x), sinTurns(x), cosTurns(y), sinTurns(y), cosTurns(z), sinTurns(z), seed);
+    }
+    /**
+     * A fairly-close approximation of {@link Math#sin(double)} that can be significantly faster (between 8x and 80x
+     * faster sin() calls in benchmarking, and both takes and returns floats; if you have access to libGDX you should
+     * consider its more-precise and sometimes-faster MathUtils.sin() method. Because this method doesn't rely on a
+     * lookup table, where libGDX's MathUtils does, applications that have a bottleneck on memory may perform better
+     * with this method than with MathUtils. Takes the same arguments Math.sin() does, so one angle in radians,
+     * which may technically be any float (but this will lose precision on fairly large floats, such as those that are
+     * larger than {@link Integer#MAX_VALUE}, because those floats themselves will lose precision at that scale). The
+     * difference between the result of this method and {@link Math#sin(double)} should be under 0.0011 at
+     * all points between -pi and pi, with an average difference of about 0.0005; not all points have been checked for
+     * potentially higher errors, though.
+     * <br>
+     * Unlike in previous versions of this method, the sign of the input doesn't affect performance here, at least not
+     * by a measurable amount.
+     * <br>
+     * The technique for sine approximation is mostly from
+     * <a href="https://web.archive.org/web/20080228213915/http://devmaster.net/forums/showthread.php?t=5784">this archived DevMaster thread</a>,
+     * with credit to "Nick". Changes have been made to accelerate wrapping from any float to the valid input range.
+     * @param radians an angle in radians as a float, often from 0 to pi * 2, though not required to be.
+     * @return the sine of the given angle, as a float between -1f and 1f (both inclusive)
+     */
+    public static float sin(float radians)
+    {
+        radians *= 0.6366197723675814f;
+        final int floor = (radians >= 0.0 ? (int) radians : (int) radians - 1) & -2;
+        radians -= floor;
+        radians *= 2f - radians;
+        return radians * (-0.775f - 0.225f * radians) * ((floor & 2) - 1);
+    }
+
+    /**
+     * A fairly-close approximation of {@link Math#cos(double)} that can be significantly faster (between 8x and 80x
+     * faster cos() calls in benchmarking, and both takes and returns floats; if you have access to libGDX you should
+     * consider its more-precise and sometimes-faster MathUtils.cos() method. Because this method doesn't rely on a
+     * lookup table, where libGDX's MathUtils does, applications that have a bottleneck on memory may perform better
+     * with this method than with MathUtils. Takes the same arguments Math.cos() does, so one angle in radians,
+     * which may technically be any float (but this will lose precision on fairly large floats, such as those that are
+     * larger than {@link Integer#MAX_VALUE}, because those floats themselves will lose precision at that scale). The
+     * difference between the result of this method and {@link Math#cos(double)} should be under 0.0011 at
+     * all points between -pi and pi, with an average difference of about 0.0005; not all points have been checked for
+     * potentially higher errors, though.
+     * <br>
+     * Unlike in previous versions of this method, the sign of the input doesn't affect performance here, at least not
+     * by a measurable amount.
+     * <br>
+     * The technique for cosine approximation is mostly from
+     * <a href="https://web.archive.org/web/20080228213915/http://devmaster.net/forums/showthread.php?t=5784">this archived DevMaster thread</a>,
+     * with credit to "Nick". Changes have been made to accelerate wrapping from any float to the valid input range.
+     * @param radians an angle in radians as a float, often from 0 to pi * 2, though not required to be.
+     * @return the cosine of the given angle, as a float between -1f and 1f (both inclusive)
+     */
+    public static float cos(float radians)
+    {
+        radians = radians * 0.6366197723675814f + 1f;
+        final int floor = (radians >= 0.0 ? (int) radians : (int) radians - 1) & -2;
+        radians -= floor;
+        radians *= 2f - radians;
+        return radians * (-0.775f - 0.225f * radians) * ((floor & 2) - 1);
+    }
+    /**
+     * A variation on {@link Math#sin(double)} that takes its input as a fraction of a turn instead of in radians (it
+     * also takes and returns a float); one turn is equal to 360 degrees or two*PI radians. This can be useful as a
+     * building block for other measurements; to make a sine method that takes its input in grad (with 400 grad equal to
+     * 360 degrees), you would just divide the grad value by 400.0 (or multiply it by 0.0025) and pass it to this
+     * method. Similarly for binary degrees, also called brad (with 256 brad equal to 360 degrees), you would divide by
+     * 256.0 or multiply by 0.00390625 before passing that value here. The brad case is especially useful because you
+     * can use a byte for any brad values, and adding up those brad values will wrap correctly (256 brad goes back to 0)
+     * while keeping perfect precision for the results (you still divide by 256.0 when you pass the brad value to this
+     * method).
+     * <br>
+     * The technique for sine approximation is mostly from
+     * <a href="https://web.archive.org/web/20080228213915/http://devmaster.net/forums/showthread.php?t=5784">this archived DevMaster thread</a>,
+     * with credit to "Nick". Changes have been made to accelerate wrapping from any double to the valid input range.
+     * @param turns an angle as a fraction of a turn as a float, with 0.5 here equivalent to PI radians in {@link #sin(float)}
+     * @return the sine of the given angle, as a float between -1.0 and 1.0 (both inclusive)
+     */
+    public static float sinTurns(float turns)
+    {
+        turns *= 4f;
+        final long floor = (turns >= 0.0 ? (long) turns : (long) turns - 1L) & -2L;
+        turns -= floor;
+        turns *= 2f - turns;
+        return turns * (-0.775f - 0.225f * turns) * ((floor & 2L) - 1L);
+    }
+
+    /**
+     * A variation on {@link Math#cos(double)} that takes its input as a fraction of a turn instead of in radians (it
+     * also takes and returns a float); one turn is equal to 360 degrees or two*PI radians. This can be useful as a
+     * building block for other measurements; to make a cosine method that takes its input in grad (with 400 grad equal
+     * to 360 degrees), you would just divide the grad value by 400.0 (or multiply it by 0.0025) and pass it to this
+     * method. Similarly for binary degrees, also called brad (with 256 brad equal to 360 degrees), you would divide by
+     * 256.0 or multiply by 0.00390625 before passing that value here. The brad case is especially useful because you
+     * can use a byte for any brad values, and adding up those brad values will wrap correctly (256 brad goes back to 0)
+     * while keeping perfect precision for the results (you still divide by 256.0 when you pass the brad value to this
+     * method).
+     * <br>
+     * The technique for cosine approximation is mostly from
+     * <a href="https://web.archive.org/web/20080228213915/http://devmaster.net/forums/showthread.php?t=5784">this archived DevMaster thread</a>,
+     * with credit to "Nick". Changes have been made to accelerate wrapping from any double to the valid input range.
+     * @param turns an angle as a fraction of a turn as a float, with 0.5 here equivalent to PI radians in {@link #cos(float)}
+     * @return the cosine of the given angle, as a float between -1.0 and 1.0 (both inclusive)
+     */
+    public static float cosTurns(float turns)
+    {
+        turns = turns * 4f + 1f;
+        final long floor = (turns >= 0.0 ? (long) turns : (long) turns - 1L) & -2L;
+        turns -= floor;
+        turns *= 2f - turns;
+        return turns * (-0.775f - 0.225f * turns) * ((floor & 2L) - 1L);
     }
 
 }
