@@ -1398,15 +1398,15 @@ public class Noise implements Serializable {
                     default:
                         return singleSimplexFractalFBM(x, y, z, w);
                 }
-            case CELLULAR:
-                switch (cellularReturnType) {
-                    case CELL_VALUE:
-                    case NOISE_LOOKUP:
-                    case DISTANCE:
-                        return singleCellular(x, y, z);
-                    default:
-                        return singleCellular2Edge(x, y, z);
-                }
+//            case CELLULAR:
+//                switch (cellularReturnType) {
+//                    case CELL_VALUE:
+//                    case NOISE_LOOKUP:
+//                    case DISTANCE:
+//                        return singleCellular(x, y, z);
+//                    default:
+//                        return singleCellular2Edge(x, y, z);
+//                }
             case WHITE_NOISE:
                 return getWhiteNoise(x, y, z, w);
             default:
@@ -1435,19 +1435,19 @@ public class Noise implements Serializable {
         v *= frequency;
 
         switch (noiseType) {
-//            case VALUE:
-//                return singleValue(seed, x, y, z, w, u, v);
-//            case VALUE_FRACTAL:
-//                switch (fractalType) {
-//                    case BILLOW:
-//                        return singleValueFractalBillow(x, y, z, w, u, v);
-//                    case RIDGED_MULTI:
-//                        return singleValueFractalRidgedMulti(x, y, z, w, u, v);
-//                    default:
-//                        return singleValueFractalFBM(x, y, z, w, u, v);
-//                }
-//            case WHITE_NOISE:
-//                return getWhiteNoise(x, y, z, w, u, v);
+            case VALUE:
+                return singleValue(seed, x, y, z, w, u, v);
+            case VALUE_FRACTAL:
+                switch (fractalType) {
+                    case BILLOW:
+                        return singleValueFractalBillow(x, y, z, w, u, v);
+                    case RIDGED_MULTI:
+                        return singleValueFractalRidgedMulti(x, y, z, w, u, v);
+                    default:
+                        return singleValueFractalFBM(x, y, z, w, u, v);
+                }
+            case WHITE_NOISE:
+                return getWhiteNoise(x, y, z, w, u, v);
 //            case PERLIN:
 //                return singlePerlin(seed, x, y, z, w, u, v);
             case PERLIN_FRACTAL:
@@ -1475,33 +1475,48 @@ public class Noise implements Serializable {
 
     // White Noise
 
-    private int FloatCast2Int(final float f) {
+    private int floatToIntMixed(final float f) {
         final int i = Float.floatToIntBits(f);
         return i ^ i >>> 16;
     }
 
+    public float getWhiteNoise(float x, float y, float z, float w, float u, float v) {
+        int xi = floatToIntMixed(x);
+        int yi = floatToIntMixed(y);
+        int zi = floatToIntMixed(z);
+        int wi = floatToIntMixed(w);
+        int ui = floatToIntMixed(u);
+        int vi = floatToIntMixed(v);
+
+        return valCoord6D(seed, xi, yi, zi, wi, ui, vi);
+    }
+
     public float getWhiteNoise(float x, float y, float z, float w) {
-        int xi = FloatCast2Int(x);
-        int yi = FloatCast2Int(y);
-        int zi = FloatCast2Int(z);
-        int wi = FloatCast2Int(w);
+        int xi = floatToIntMixed(x);
+        int yi = floatToIntMixed(y);
+        int zi = floatToIntMixed(z);
+        int wi = floatToIntMixed(w);
 
         return valCoord4D(seed, xi, yi, zi, wi);
     }
 
     public float getWhiteNoise(float x, float y, float z) {
-        int xi = FloatCast2Int(x);
-        int yi = FloatCast2Int(y);
-        int zi = FloatCast2Int(z);
+        int xi = floatToIntMixed(x);
+        int yi = floatToIntMixed(y);
+        int zi = floatToIntMixed(z);
 
         return valCoord3D(seed, xi, yi, zi);
     }
 
     public float getWhiteNoise(float x, float y) {
-        int xi = FloatCast2Int(x);
-        int yi = FloatCast2Int(y);
+        int xi = floatToIntMixed(x);
+        int yi = floatToIntMixed(y);
 
         return valCoord2D(seed, xi, yi);
+    }
+
+    public float getWhiteNoiseInt(int x, int y, int z, int w, int u, int v) {
+        return valCoord6D(seed, x, y, z, w, u, v);
     }
 
     public float getWhiteNoiseInt(int x, int y, int z, int w) {
@@ -1624,6 +1639,22 @@ public class Noise implements Serializable {
         float yf1 = lerp(xf01, xf11, ys);
 
         return lerp(yf0, yf1, zs);
+    }
+
+    public float getValueFractal(float x, float y, float z, float w) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+        w *= frequency;
+
+        switch (fractalType) {
+            case BILLOW:
+                return singleValueFractalBillow(x, y, z, w);
+            case RIDGED_MULTI:
+                return singleValueFractalRidgedMulti(x, y, z, w);
+            default:
+                return singleValueFractalFBM(x, y, z, w);
+        }
     }
 
 
@@ -1831,6 +1862,211 @@ public class Noise implements Serializable {
 
         return lerp(xf0, xf1, ys);
     }
+    
+    public float getValueFractal(float x, float y, float z, float w, float u, float v) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+        w *= frequency;
+        u *= frequency;
+        v *= frequency;
+
+        switch (fractalType) {
+            case BILLOW:
+                return singleValueFractalBillow(x, y, z, w, u, v);
+            case RIDGED_MULTI:
+                return singleValueFractalRidgedMulti(x, y, z, w, u, v);
+            default:
+                return singleValueFractalFBM(x, y, z, w, u, v);
+        }
+    }
+
+    public float getValue(float x, float y, float z, float w, float u, float v) {
+        return singleValue(seed, x * frequency, y * frequency, z * frequency, w * frequency, u * frequency, v * frequency);
+    }
+
+    private float singleValue(int seed, float x, float y, float z, float w, float u, float v) {
+        int x0 = fastFloor(x);
+        int y0 = fastFloor(y);
+        int z0 = fastFloor(z);
+        int w0 = fastFloor(w);
+        int u0 = fastFloor(u);
+        int v0 = fastFloor(v);
+        int x1 = x0 + 1;
+        int y1 = y0 + 1;
+        int z1 = z0 + 1;
+        int w1 = w0 + 1;
+        int u1 = u0 + 1;
+        int v1 = v0 + 1;
+
+        float xs, ys, zs, ws, us, vs;
+        switch (interpolation) {
+            default:
+            case LINEAR:
+                xs = x - x0;
+                ys = y - y0;
+                zs = z - z0;
+                ws = w - w0;
+                us = u - u0;
+                vs = v - v0;
+                break;
+            case HERMITE:
+                xs = hermiteInterpolator(x - x0);
+                ys = hermiteInterpolator(y - y0);
+                zs = hermiteInterpolator(z - z0);
+                ws = hermiteInterpolator(w - w0);
+                us = hermiteInterpolator(u - u0);
+                vs = hermiteInterpolator(v - v0);
+                break;
+            case QUINTIC:
+                xs = quinticInterpolator(x - x0);
+                ys = quinticInterpolator(y - y0);
+                zs = quinticInterpolator(z - z0);
+                ws = quinticInterpolator(w - w0);
+                us = quinticInterpolator(u - u0);
+                vs = quinticInterpolator(v - v0);
+                break;
+        }
+
+        final float xf00000 = lerp(valCoord6D(seed, x0, y0, z0, w0, u0, v0), valCoord6D(seed, x1, y0, z0, w0, u0, v0), xs);
+        final float xf10000 = lerp(valCoord6D(seed, x0, y1, z0, w0, u0, v0), valCoord6D(seed, x1, y1, z0, w0, u0, v0), xs);
+        final float xf01000 = lerp(valCoord6D(seed, x0, y0, z1, w0, u0, v0), valCoord6D(seed, x1, y0, z1, w0, u0, v0), xs);
+        final float xf11000 = lerp(valCoord6D(seed, x0, y1, z1, w0, u0, v0), valCoord6D(seed, x1, y1, z1, w0, u0, v0), xs);
+        final float xf00100 = lerp(valCoord6D(seed, x0, y0, z0, w1, u0, v0), valCoord6D(seed, x1, y0, z0, w1, u0, v0), xs);
+        final float xf10100 = lerp(valCoord6D(seed, x0, y1, z0, w1, u0, v0), valCoord6D(seed, x1, y1, z0, w1, u0, v0), xs);
+        final float xf01100 = lerp(valCoord6D(seed, x0, y0, z1, w1, u0, v0), valCoord6D(seed, x1, y0, z1, w1, u0, v0), xs);
+        final float xf11100 = lerp(valCoord6D(seed, x0, y1, z1, w1, u0, v0), valCoord6D(seed, x1, y1, z1, w1, u0, v0), xs);
+
+        final float xf00010 = lerp(valCoord6D(seed, x0, y0, z0, w0, u1, v0), valCoord6D(seed, x1, y0, z0, w0, u1, v0), xs);
+        final float xf10010 = lerp(valCoord6D(seed, x0, y1, z0, w0, u1, v0), valCoord6D(seed, x1, y1, z0, w0, u1, v0), xs);
+        final float xf01010 = lerp(valCoord6D(seed, x0, y0, z1, w0, u1, v0), valCoord6D(seed, x1, y0, z1, w0, u1, v0), xs);
+        final float xf11010 = lerp(valCoord6D(seed, x0, y1, z1, w0, u1, v0), valCoord6D(seed, x1, y1, z1, w0, u1, v0), xs);
+        final float xf00110 = lerp(valCoord6D(seed, x0, y0, z0, w1, u1, v0), valCoord6D(seed, x1, y0, z0, w1, u1, v0), xs);
+        final float xf10110 = lerp(valCoord6D(seed, x0, y1, z0, w1, u1, v0), valCoord6D(seed, x1, y1, z0, w1, u1, v0), xs);
+        final float xf01110 = lerp(valCoord6D(seed, x0, y0, z1, w1, u1, v0), valCoord6D(seed, x1, y0, z1, w1, u1, v0), xs);
+        final float xf11110 = lerp(valCoord6D(seed, x0, y1, z1, w1, u1, v0), valCoord6D(seed, x1, y1, z1, w1, u1, v0), xs);
+
+        final float xf00001 = lerp(valCoord6D(seed, x0, y0, z0, w0, u0, v1), valCoord6D(seed, x1, y0, z0, w0, u0, v1), xs);
+        final float xf10001 = lerp(valCoord6D(seed, x0, y1, z0, w0, u0, v1), valCoord6D(seed, x1, y1, z0, w0, u0, v1), xs);
+        final float xf01001 = lerp(valCoord6D(seed, x0, y0, z1, w0, u0, v1), valCoord6D(seed, x1, y0, z1, w0, u0, v1), xs);
+        final float xf11001 = lerp(valCoord6D(seed, x0, y1, z1, w0, u0, v1), valCoord6D(seed, x1, y1, z1, w0, u0, v1), xs);
+        final float xf00101 = lerp(valCoord6D(seed, x0, y0, z0, w1, u0, v1), valCoord6D(seed, x1, y0, z0, w1, u0, v1), xs);
+        final float xf10101 = lerp(valCoord6D(seed, x0, y1, z0, w1, u0, v1), valCoord6D(seed, x1, y1, z0, w1, u0, v1), xs);
+        final float xf01101 = lerp(valCoord6D(seed, x0, y0, z1, w1, u0, v1), valCoord6D(seed, x1, y0, z1, w1, u0, v1), xs);
+        final float xf11101 = lerp(valCoord6D(seed, x0, y1, z1, w1, u0, v1), valCoord6D(seed, x1, y1, z1, w1, u0, v1), xs);
+
+        final float xf00011 = lerp(valCoord6D(seed, x0, y0, z0, w0, u1, v1), valCoord6D(seed, x1, y0, z0, w0, u1, v1), xs);
+        final float xf10011 = lerp(valCoord6D(seed, x0, y1, z0, w0, u1, v1), valCoord6D(seed, x1, y1, z0, w0, u1, v1), xs);
+        final float xf01011 = lerp(valCoord6D(seed, x0, y0, z1, w0, u1, v1), valCoord6D(seed, x1, y0, z1, w0, u1, v1), xs);
+        final float xf11011 = lerp(valCoord6D(seed, x0, y1, z1, w0, u1, v1), valCoord6D(seed, x1, y1, z1, w0, u1, v1), xs);
+        final float xf00111 = lerp(valCoord6D(seed, x0, y0, z0, w1, u1, v1), valCoord6D(seed, x1, y0, z0, w1, u1, v1), xs);
+        final float xf10111 = lerp(valCoord6D(seed, x0, y1, z0, w1, u1, v1), valCoord6D(seed, x1, y1, z0, w1, u1, v1), xs);
+        final float xf01111 = lerp(valCoord6D(seed, x0, y0, z1, w1, u1, v1), valCoord6D(seed, x1, y0, z1, w1, u1, v1), xs);
+        final float xf11111 = lerp(valCoord6D(seed, x0, y1, z1, w1, u1, v1), valCoord6D(seed, x1, y1, z1, w1, u1, v1), xs);
+
+        final float yf0000 = lerp(xf00000, xf10000, ys);
+        final float yf1000 = lerp(xf01000, xf11000, ys);
+        final float yf0100 = lerp(xf00100, xf10100, ys);
+        final float yf1100 = lerp(xf01100, xf11100, ys);
+
+        final float yf0010 = lerp(xf00010, xf10010, ys);
+        final float yf1010 = lerp(xf01010, xf11010, ys);
+        final float yf0110 = lerp(xf00110, xf10110, ys);
+        final float yf1110 = lerp(xf01110, xf11110, ys);
+
+        final float yf0001 = lerp(xf00001, xf10001, ys);
+        final float yf1001 = lerp(xf01001, xf11001, ys);
+        final float yf0101 = lerp(xf00101, xf10101, ys);
+        final float yf1101 = lerp(xf01101, xf11101, ys);
+
+        final float yf0011 = lerp(xf00011, xf10011, ys);
+        final float yf1011 = lerp(xf01011, xf11011, ys);
+        final float yf0111 = lerp(xf00111, xf10111, ys);
+        final float yf1111 = lerp(xf01111, xf11111, ys);
+
+        final float zf000 = lerp(yf0000, yf1000, zs);
+        final float zf100 = lerp(yf0100, yf1100, zs);
+        
+        final float zf010 = lerp(yf0010, yf1010, zs);
+        final float zf110 = lerp(yf0110, yf1110, zs);
+        
+        final float zf001 = lerp(yf0001, yf1001, zs);
+        final float zf101 = lerp(yf0101, yf1101, zs);
+        
+        final float zf011 = lerp(yf0011, yf1011, zs);
+        final float zf111 = lerp(yf0111, yf1111, zs);
+
+        final float wf00 = lerp(zf000, zf100, ws);
+        final float wf10 = lerp(zf010, zf110, ws);
+        final float wf01 = lerp(zf001, zf101, ws);
+        final float wf11 = lerp(zf011, zf111, ws);
+
+        final float uf0 = lerp(wf00, wf10, us);
+        final float uf1 = lerp(wf01, wf11, us);
+        
+        return lerp(uf0, uf1, vs);
+    }
+    private float singleValueFractalFBM(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = singleValue(seed, x, y, z, w, u, v);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += singleValue(++seed, x, y, z, w, u, v) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleValueFractalBillow(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = Math.abs(singleValue(seed, x, y, z, w, u, v)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleValue(++seed, x, y, z, w, u, v)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleValueFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = 1 - Math.abs(singleValue(seed, x, y, z, w, u, v));
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum -= (1 - Math.abs(singleValue(++seed, x, y, z, w, u, v))) * amp;
+        }
+
+        return sum;
+    }
+
+
 
     // Gradient Noise
     public float getPerlinFractal(float x, float y, float z) {
