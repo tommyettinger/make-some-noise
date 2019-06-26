@@ -969,7 +969,7 @@ public class Noise implements Serializable {
         cellularNoiseLookup = noise;
     }
 
-    // Sets the maximum perturb distance from original location when using GradientPerturb{Fractal}(...)
+    // Sets the maximum perturb distance from original location when using gradientPerturb{Fractal}(...)
     // Default: 1.0
     public void setGradientPerturbAmp(float gradientPerturbAmp) {
         this.gradientPerturbAmp = gradientPerturbAmp / (float) 0.45;

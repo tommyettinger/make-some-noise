@@ -13,7 +13,7 @@
 
     <name>make_some_noise</name>
 
-    <description>Fictional language generation toolbox</description>
+    <description>Continuous noise functions in 2D, 3D, 4D, and 6D</description>
 
     <url>https://github.com/tommyettinger/make-some-noise</url>
 
@@ -58,6 +58,7 @@
         <maven.gpg.version>1.6</maven.gpg.version>
         <jdk.version>1.7</jdk.version>
         <junit.version>4.11</junit.version>
+        <gdx.version>1.9.9</gdx.version>
     </properties>
 
 
@@ -68,6 +69,26 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx</artifactId>
+            <version>${gdx.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-backend-lwjgl</artifactId>
+            <version>${gdx.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-platform</artifactId>
+            <version>${gdx.version}</version>
+            <classifier>natives-desktop</classifier>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <issueManagement>
