@@ -1278,7 +1278,7 @@ public class Noise implements Serializable {
                     case BILLOW:
                         return singleCubicFractalBillow(x, y, z);
                     case RIDGED_MULTI:
-                        return singleCubicFractalRigidMulti(x, y, z);
+                        return singleCubicFractalRidgedMulti(x, y, z);
                     default:
                         return singleCubicFractalFBM(x, y, z);
                 }
@@ -1349,7 +1349,7 @@ public class Noise implements Serializable {
                     case BILLOW:
                         return singleCubicFractalBillow(x, y);
                     case RIDGED_MULTI:
-                        return singleCubicFractalRigidMulti(x, y);
+                        return singleCubicFractalRidgedMulti(x, y);
                     default:
                         return singleCubicFractalFBM(x, y);
                 }
@@ -1590,19 +1590,18 @@ public class Noise implements Serializable {
 
     private float singleValueFractalRidgedMulti(float x, float y, float z) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleValue(seed, x, y, z));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleValue(seed + i, x, y, z));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleValue(++seed, x, y, z))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getValue(float x, float y, float z) {
@@ -1758,20 +1757,19 @@ public class Noise implements Serializable {
 
     private float singleValueFractalRidgedMulti(float x, float y, float z, float w) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleValue(seed, x, y, z, w));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleValue(seed + i, x, y, z, w));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
             w *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleValue(++seed, x, y, z, w))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getValueFractal(float x, float y) {
@@ -1823,18 +1821,17 @@ public class Noise implements Serializable {
 
     private float singleValueFractalRidgedMulti(float x, float y) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleValue(seed, x, y));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleValue(seed + i, x, y));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleValue(++seed, x, y))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getValue(float x, float y) {
@@ -2055,22 +2052,21 @@ public class Noise implements Serializable {
 
     private float singleValueFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleValue(seed, x, y, z, w, u, v));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleValue(seed + i, x, y, z, w, u, v));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
             w *= lacunarity;
             u *= lacunarity;
             v *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleValue(++seed, x, y, z, w, u, v))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
 
@@ -2129,19 +2125,18 @@ public class Noise implements Serializable {
 
     private float singlePerlinFractalRidgedMulti(float x, float y, float z) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singlePerlin(seed, x, y, z));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singlePerlin(seed + i, x, y, z));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singlePerlin(++seed, x, y, z))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getPerlin(float x, float y, float z) {
@@ -2295,20 +2290,19 @@ public class Noise implements Serializable {
 
     private float singlePerlinFractalRidgedMulti(float x, float y, float z, float w) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singlePerlin(seed, x, y, z, w));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singlePerlin(seed + i, x, y,  z, w));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
             w *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singlePerlin(++seed, x, y, z, w))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getPerlinFractal(float x, float y) {
@@ -2361,18 +2355,17 @@ public class Noise implements Serializable {
 
     private float singlePerlinFractalRidgedMulti(float x, float y) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singlePerlin(seed, x, y));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singlePerlin(seed + i, x, y));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singlePerlin(++seed, x, y))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getPerlin(float x, float y) {
@@ -2592,22 +2585,21 @@ public class Noise implements Serializable {
 
     private float singlePerlinFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singlePerlin(seed, x, y, z, w, u, v));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singlePerlin(seed + i, x, y, z, w, u, v));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
             w *= lacunarity;
             u *= lacunarity;
             v *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singlePerlin(++seed, x, y, z, w, u, v))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     // Simplex Noise
@@ -2821,22 +2813,7 @@ public class Noise implements Serializable {
      */
     public float ridged3D(float x, float y, float z, int seed, int octaves)
     {
-        x *= 0.03125f;
-        y *= 0.03125f;
-        z *= 0.03125f;
-
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y, z));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= 2f;
-            y *= 2f;
-            z *= 2f;
-
-            amp *= 0.5f;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y, z))) * amp;
-        }
-        return sum;
+        return ridged3D(x, y, z, seed, octaves, 0.03125f, 2f);
     }
     /**
      * Generates ridged-multi simplex noise with the given amount of octaves, specified frequency, and the default
@@ -2850,31 +2827,18 @@ public class Noise implements Serializable {
      */
     public float ridged3D(float x, float y, float z, int seed, int octaves, float frequency)
     {
-        x *= frequency;
-        y *= frequency;
-        z *= frequency;
-
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y, z));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= 2f;
-            y *= 2f;
-            z *= 2f;
-
-            amp *= 0.5f;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y, z))) * amp;
-        }
-        return sum;
+        return ridged3D(x, y, z, seed, octaves, frequency, 2f);
     }
     /**
      * Generates ridged-multi simplex noise with the given amount of octaves and specified lacunarity (the amount of
-     * frequency change between octaves) and gain (0.5).
+     * frequency change between octaves); gain is not used.
      * @param x
      * @param y
      * @param z
-     * @param seed
-     * @param octaves
+     * @param seed any int
+     * @param octaves how many "layers of detail" to generate; at least 1, but note this slows down with many octaves
+     * @param frequency often about {@code 1f / 32f}, but generally adjusted for the use case
+     * @param lacunarity when {@code octaves} is 2 or more, this affects the change between layers
      * @return noise as a float between -1f and 1f
      */
     public float ridged3D(float x, float y, float z, int seed, int octaves, float frequency, float lacunarity)
@@ -2883,65 +2847,34 @@ public class Noise implements Serializable {
         y *= frequency;
         z *= frequency;
 
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y, z));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleSimplex(seed + i, x, y, z));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
-
-            amp *= 0.5f;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y, z))) * amp;
         }
-        return sum;
-    }
-
-    /**
-     * Generates ridged-multi simplex noise with the given amount of octaves and specified lacunarity (the amount of
-     * frequency change between octaves) and gain (loosely, how much to emphasize lower-frequency octaves).
-     * @param x
-     * @param y
-     * @param z
-     * @param seed
-     * @param octaves
-     * @return noise as a float between -1f and 1f
-     */
-    public float ridged3D(float x, float y, float z, int seed, int octaves, float frequency, float lacunarity, float gain)
-    {
-        x *= frequency;
-        y *= frequency;
-        z *= frequency;
-
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y, z));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y, z))) * amp;
-        }
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     private float singleSimplexFractalRidgedMulti(float x, float y, float z) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y, z));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleSimplex(seed + i, x, y, z));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y, z))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getSimplex(float x, float y, float z) {
@@ -3245,20 +3178,7 @@ public class Noise implements Serializable {
      */
     public float ridged2D(float x, float y, int seed, int octaves)
     {
-        x *= 0.03125f;
-        y *= 0.03125f;
-
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= 2f;
-            y *= 2f;
-
-            amp *= 0.5f;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y))) * amp;
-        }
-        return sum;
+        return ridged2D(x, y, seed, octaves, 0.03125f, 2f);
     }
     /**
      * Generates ridged-multi simplex noise with the given amount of octaves and default frequency (0.03125), lacunarity
@@ -3271,28 +3191,17 @@ public class Noise implements Serializable {
      */
     public float ridged2D(float x, float y, int seed, int octaves, float frequency)
     {
-        x *= frequency;
-        y *= frequency;
-
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= 2f;
-            y *= 2f;
-
-            amp *= 0.5f;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y))) * amp;
-        }
-        return sum;
+        return ridged2D(x, y, seed, octaves, frequency, 2f);
     }
     /**
      * Generates ridged-multi simplex noise with the given amount of octaves and specified lacunarity (the amount of
-     * frequency change between octaves) and gain (0.5).
+     * frequency change between octaves); gain is not used.
      * @param x
      * @param y
-     * @param seed
-     * @param octaves
+     * @param seed any int
+     * @param octaves how many "layers of detail" to generate; at least 1, but note this slows down with many octaves
+     * @param frequency often about {@code 1f / 32f}, but generally adjusted for the use case
+     * @param lacunarity when {@code octaves} is 2 or more, this affects the change between layers
      * @return noise as a float between -1f and 1f
      */
     public float ridged2D(float x, float y, int seed, int octaves, float frequency, float lacunarity)
@@ -3300,60 +3209,32 @@ public class Noise implements Serializable {
         x *= frequency;
         y *= frequency;
 
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleSimplex(seed + i, x, y));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
-
-            amp *= 0.5f;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y))) * amp;
         }
-        return sum;
-    }
-
-    /**
-     * Generates ridged-multi simplex noise with the given amount of octaves and specified lacunarity (the amount of
-     * frequency change between octaves) and gain (loosely, how much to emphasize lower-frequency octaves).
-     * @param x
-     * @param y
-     * @param seed
-     * @param octaves
-     * @return noise as a float between -1f and 1f
-     */
-    public float ridged2D(float x, float y, int seed, int octaves, float frequency, float lacunarity, float gain)
-    {
-        x *= frequency;
-        y *= frequency;
-
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y))) * amp;
-        }
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     private float singleSimplexFractalRidgedMulti(float x, float y) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleSimplex(seed + i, x, y));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleSimplex(++seed, x, y))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getSimplex(float x, float y) {
@@ -3549,20 +3430,19 @@ public class Noise implements Serializable {
     }
     private float singleSimplexFractalRidgedMulti(float x, float y, float z, float w) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y, z, w));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleSimplex(seed + i, x, y, z, w));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
             w *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y, z, w))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     private float singleSimplexFractalBillow(float x, float y, float z, float w) {
@@ -4222,22 +4102,21 @@ public class Noise implements Serializable {
     }
     private float singleSimplexFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleSimplex(seed, x, y, z, w, u, v));
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleSimplex(seed + i, x, y, z, w, u, v));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
             w *= lacunarity;
             u *= lacunarity;
             v *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleSimplex(seed + i, x, y, z, w, u, v))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     private float singleSimplexFractalBillow(float x, float y, float z, float w, float u, float v) {
@@ -4272,7 +4151,7 @@ public class Noise implements Serializable {
             case BILLOW:
                 return singleCubicFractalBillow(x, y, z);
             case RIDGED_MULTI:
-                return singleCubicFractalRigidMulti(x, y, z);
+                return singleCubicFractalRidgedMulti(x, y, z);
             default:
                 return 0;
         }
@@ -4314,22 +4193,20 @@ public class Noise implements Serializable {
         return sum * fractalBounding;
     }
 
-    private float singleCubicFractalRigidMulti(float x, float y, float z) {
+    private float singleCubicFractalRidgedMulti(float x, float y, float z) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleCubic(seed, x, y, z));
-        float amp = 1;
-        int i = 0;
-
-        while (++i < octaves) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleCubic(seed + i, x, y, z));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
             z *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleCubic(++seed, x, y, z))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getCubic(float x, float y, float z) {
@@ -4396,7 +4273,7 @@ public class Noise implements Serializable {
             case BILLOW:
                 return singleCubicFractalBillow(x, y);
             case RIDGED_MULTI:
-                return singleCubicFractalRigidMulti(x, y);
+                return singleCubicFractalRidgedMulti(x, y);
             default:
                 return 0;
         }
@@ -4436,21 +4313,19 @@ public class Noise implements Serializable {
         return sum * fractalBounding;
     }
 
-    private float singleCubicFractalRigidMulti(float x, float y) {
+    private float singleCubicFractalRidgedMulti(float x, float y) {
         int seed = this.seed;
-        float sum = 1 - Math.abs(singleCubic(seed, x, y));
-        float amp = 1;
-        int i = 0;
-
-        while (++i < octaves) {
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleCubic(seed + i, x, y));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
-
-            amp *= gain;
-            sum -= (1 - Math.abs(singleCubic(++seed, x, y))) * amp;
         }
-
-        return sum;
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getCubic(float x, float y) {
