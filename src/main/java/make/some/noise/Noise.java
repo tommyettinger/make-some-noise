@@ -3406,7 +3406,7 @@ public class Noise implements Serializable {
             n += t * t * gradCoord2D(seed, i + 1, j + 1, x2, y2);
         }
 
-        return 9.125f * n;
+        return 9.11f * n;
     }
 
     public float getSimplex(float x, float y, float z, float w) {
@@ -4173,7 +4173,7 @@ public class Noise implements Serializable {
             }
             skewOffset += G6;
         }
-        return 7.5f * n;
+        return 8.1f * n;
 
     }
 
