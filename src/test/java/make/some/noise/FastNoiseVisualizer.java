@@ -54,12 +54,18 @@ public class FastNoiseVisualizer extends ApplicationAdapter {
                 switch (keycode) {
                     case MINUS:
                         noise.setNoiseType((noise.getNoiseType() + 9) % 10);
+                        red.setNoiseType(noise.getNoiseType());
+                        green.setNoiseType(noise.getNoiseType());
+                        blue.setNoiseType(noise.getNoiseType());
                         putMap();
                         break;
                     case EQUALS:
                     case PLUS:
                     case N: // noise type
                         noise.setNoiseType((noise.getNoiseType() + 1) % 10);
+                        red.setNoiseType(noise.getNoiseType());
+                        green.setNoiseType(noise.getNoiseType());
+                        blue.setNoiseType(noise.getNoiseType());
                         putMap();
                         break;
                     case U:
@@ -69,36 +75,7 @@ public class FastNoiseVisualizer extends ApplicationAdapter {
                     case P: //pause
                         keepGoing = !keepGoing;
                     case C:
-                        if(color = !color)
-                        {
-                            red.setNoiseType(noise.getNoiseType());
-                            green.setNoiseType(noise.getNoiseType());
-                            blue.setNoiseType(noise.getNoiseType());
-                            
-                            red.setFrequency(noise.getFrequency());
-                            green.setFrequency(noise.getFrequency());
-                            blue.setFrequency(noise.getFrequency());
-
-                            red.setFractalType(noise.getFractalType());
-                            green.setFractalType(noise.getFractalType());
-                            blue.setFractalType(noise.getFractalType());
-
-                            if (inverse) {
-                                red.setFractalLacunarity(0.5f);
-                                red.setFractalGain(2f);
-                                green.setFractalLacunarity(0.5f);
-                                green.setFractalGain(2f);
-                                blue.setFractalLacunarity(0.5f);
-                                blue.setFractalGain(2f);
-                            } else {
-                                red.setFractalLacunarity(2f);
-                                red.setFractalGain(0.5f);
-                                green.setFractalLacunarity(2f);
-                                green.setFractalGain(0.5f);
-                                blue.setFractalLacunarity(2f);
-                                blue.setFractalGain(0.5f);
-                            }
-                        }
+                        color = !color;
                         putMap();
                         break;
                     case E: //earlier seed
@@ -121,27 +98,51 @@ public class FastNoiseVisualizer extends ApplicationAdapter {
                         break;
                     case F: // frequency
                         noise.setFrequency((float) Math.sin(freq += 0.125f) * 0.25f + 0.25f + 0x1p-7f);
+                        red.setFrequency(noise.getFrequency());
+                        green.setFrequency(noise.getFrequency());
+                        blue.setFrequency(noise.getFrequency());
                         putMap();
                         break;
                     case R: // fRactal type
                         noise.setFractalType((noise.getFractalType() + 1) % 3);
+                        red.setFractalType(noise.getFractalType());
+                        green.setFractalType(noise.getFractalType());
+                        blue.setFractalType(noise.getFractalType());
                         putMap();
                         break;
                     case H: // higher octaves
                         noise.setFractalOctaves((octaves = octaves + 1 & 3) + 1);
+                        red.setFractalOctaves(noise.getFractalOctaves());
+                        green.setFractalOctaves(noise.getFractalOctaves());
+                        blue.setFractalOctaves(noise.getFractalOctaves());
                         putMap();
                         break;
                     case L: // lower octaves
                         noise.setFractalOctaves((octaves = octaves + 3 & 3) + 1);
+                        red.setFractalOctaves(noise.getFractalOctaves());
+                        green.setFractalOctaves(noise.getFractalOctaves());
+                        blue.setFractalOctaves(noise.getFractalOctaves());
                         putMap();
                         break;
                     case I: // inverse mode
                         if (inverse = !inverse) {
                             noise.setFractalLacunarity(0.5f);
                             noise.setFractalGain(2f);
+                            red.setFractalLacunarity(0.5f);
+                            red.setFractalGain(2f);
+                            green.setFractalLacunarity(0.5f);
+                            green.setFractalGain(2f);
+                            blue.setFractalLacunarity(0.5f);
+                            blue.setFractalGain(2f);
                         } else {
                             noise.setFractalLacunarity(2f);
                             noise.setFractalGain(0.5f);
+                            red.setFractalLacunarity(2f);
+                            red.setFractalGain(0.5f);
+                            green.setFractalLacunarity(2f);
+                            green.setFractalGain(0.5f);
+                            blue.setFractalLacunarity(2f);
+                            blue.setFractalGain(0.5f);
                         }
                         putMap();
                         break;
