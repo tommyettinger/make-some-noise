@@ -15,7 +15,7 @@ import static com.badlogic.gdx.graphics.GL20.GL_POINTS;
 
 /**
  */
-public class FastNoiseVisualizer extends ApplicationAdapter {
+public class NoiseVisualizer extends ApplicationAdapter {
 
     private int dim = 0; // this can be 0, 1, 2, or 3; these correspond to 2D, 3D, 4D, and 6D
     private int octaves = 2;
@@ -97,7 +97,7 @@ public class FastNoiseVisualizer extends ApplicationAdapter {
                         putMap();
                         break;
                     case F: // frequency
-                        noise.setFrequency((float) Math.sin(freq += 0.125f) * 0.25f + 0.25f + 0x1p-7f);
+                        noise.setFrequency(Noise.sin(freq += 0.125f) * 0.15f + 0.17f);
                         red.setFrequency(noise.getFrequency());
                         green.setFrequency(noise.getFrequency());
                         blue.setFrequency(noise.getFrequency());
@@ -296,6 +296,6 @@ public class FastNoiseVisualizer extends ApplicationAdapter {
         config.foregroundFPS = 0;
         config.vSyncEnabled = false;
         config.resizable = false;
-        new LwjglApplication(new FastNoiseVisualizer(), config);
+        new LwjglApplication(new NoiseVisualizer(), config);
     }
 }

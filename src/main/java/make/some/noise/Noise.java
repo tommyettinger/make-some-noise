@@ -41,7 +41,7 @@ import java.io.Serializable;
  * pattern). Most of these have fractal variants that allow layering multiple frequencies of noise. After construction
  * you can set how a fractal variant is layered using {@link #setFractalType(int)}, with {@link #FBM} as the normal mode
  * and {@link #RIDGED_MULTI} as a not-uncommon way of altering the form noise takes. This supports 2D, 3D, and 4D fully,
- * with partial support for 6D (which can be used for tiling 3D maps, but this isn't implemented here).
+ * with partial support for 6D (which can be used for tiling 3D maps).
  */
 public class Noise implements Serializable {
         /**
@@ -417,22 +417,7 @@ public class Noise implements Serializable {
     public static final float H2f = 0.42264974f;
     public static final float F3f = 0.33333334f;
     public static final float G3f = 0.16666667f;
-    //0.5f * (root3 - 1f),
-    //(3f - root3) * 0.16666667f,
-    //2f * G2f,
-    /*
-    root5 = 2.236068f,
-    F4f = (root5 - 1f) * 0.25f,
-    G4f = (5f - root5) * 0.05f,
-    unit1_4f =  0.70710678118f, unit1_8f = 0.38268343236f, unit3_8f = 0.92387953251f;
-*/
-    /*
-    protected static final float[][] grad2f = {
-            {1f, 0f}, {-1f, 0f}, {0f, 1f}, {0f, -1f},
-            {unit3_8f, unit1_8f}, {unit3_8f, -unit1_8f}, {-unit3_8f, unit1_8f}, {-unit3_8f, -unit1_8f},
-            {unit1_4f, unit1_4f}, {unit1_4f, -unit1_4f}, {-unit1_4f, unit1_4f}, {-unit1_4f, -unit1_4f},
-            {unit1_8f, unit3_8f}, {unit1_8f, -unit3_8f}, {-unit1_8f, unit3_8f}, {-unit1_8f, -unit3_8f}};
-    */
+
     protected static final float[][] phiGrad2f = {
             {0.6499429579167653f, 0.759982994187637f},
             {-0.1551483029088119f, 0.9878911904175052f},
@@ -691,7 +676,7 @@ public class Noise implements Serializable {
             {0.9744164792492415f, 0.22474991650168097f},
             {0.462509014279733f, 0.8866145790082576f},
     };
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     public static final int VALUE = 0, VALUE_FRACTAL = 1, PERLIN = 2, PERLIN_FRACTAL = 3,
             SIMPLEX = 4, SIMPLEX_FRACTAL = 5, CELLULAR = 6, WHITE_NOISE = 7, CUBIC = 8, CUBIC_FRACTAL = 9;
 
@@ -722,18 +707,31 @@ public class Noise implements Serializable {
 
     private float gradientPerturbAmp = 1f / 0.45f;
 
-    public static final Noise instance = new Noise(1337, 1f, SIMPLEX_FRACTAL);
-    
+    /**
+     * A publicly available Noise object with seed 1337, frequency 1.0f/32.0f, 1 octave of Simplex noise using
+     * SIMPLEX_FRACTAL noiseType, 2f lacunarity and 0.5f gain. It's encouraged to use methods that temporarily configure
+     * this variable, like {@link #getNoiseWithSeed(float, float, int)} rather than changing its settings and using a
+     * method that needs that lasting configuration, like {@link #getConfiguredNoise(float, float)}.
+     */
+    public static final Noise instance = new Noise();
+    /**
+     * A constructor that takes no parameters, and uses all default settings with a seed of 1337. An example call to
+     * this would be {@code new Noise()}, which makes noise with the seed 1337, a default frequency of 1.0f/32.0f, 1
+     * octave of Simplex noise (since this doesn't specify octave count, it always uses 1 even for the 
+     * SIMPLEX_FRACTAL noiseType this uses, but you can call {@link #setFractalOctaves(int)} later to benefit from the
+     * fractal noiseType), and normal lacunarity and gain (when unspecified, they are 2f and 0.5f).
+     */
     public Noise() {
         this(1337);
     }
 
     /**
-     * A constructor that takes two parameters to specify the Noise from the start. An example call to this
-     * would be {@code new Noise(1337)}, which makes noise with the seed 1337, a default frequency of 1.0f/32.0f, 1
-     * octave of Simplex noise (since this doesn't specify octave count, it always uses 1 even for the 
-     * SIMPLEX_FRACTAL noiseType this uses, but you can call {@link #setFractalOctaves(int)} later to benefit from the
-     * fractal noiseType), and normal lacunarity and gain (when unspecified, they are 2f and 0.5f).
+     * A constructor that takes only a parameter for the Noise's seed, which should produce different results for
+     * any different seeds. An example call to this would be {@code new Noise(1337)}, which makes noise with the
+     * seed 1337, a default frequency of 1.0f/32.0f, 1 octave of Simplex noise (since this doesn't specify octave count,
+     * it always uses 1 even for the SIMPLEX_FRACTAL noiseType this uses, but you can call
+     * {@link #setFractalOctaves(int)} later to benefit from the fractal noiseType), and normal lacunarity and gain
+     * (when unspecified, they are 2f and 0.5f).
      * @param seed the int seed for the noise, which should significantly affect the produced noise
      */
     public Noise(int seed) {
@@ -973,6 +971,54 @@ public class Noise implements Serializable {
     // Default: 1.0
     public void setGradientPerturbAmp(float gradientPerturbAmp) {
         this.gradientPerturbAmp = gradientPerturbAmp / (float) 0.45;
+    }
+
+    public double getNoise(double x, double y) {
+        return getConfiguredNoise((float)x, (float)y);
+    }
+
+    public double getNoiseWithSeed(double x, double y, long seed) {
+        int s = this.seed;
+        this.seed = (int) (seed ^ seed >>> 32);
+        double r = getConfiguredNoise((float)x, (float)y);
+        this.seed = s;
+        return r;
+    }
+
+    public double getNoise(double x, double y, double z) {
+        return getConfiguredNoise((float)x, (float)y, (float)z);
+    }
+
+    public double getNoiseWithSeed(double x, double y, double z, long seed) {
+        int s = this.seed;
+        this.seed = (int) (seed ^ seed >>> 32);
+        double r = getConfiguredNoise((float)x, (float)y, (float)z);
+        this.seed = s;
+        return r;
+    }
+
+    public double getNoise(double x, double y, double z, double w) {
+        return getConfiguredNoise((float)x, (float)y, (float)z, (float)w);
+    }
+
+    public double getNoiseWithSeed(double x, double y, double z, double w, long seed) {
+        int s = this.seed;
+        this.seed = (int) (seed ^ seed >>> 32);
+        double r = getConfiguredNoise((float)x, (float)y, (float)z, (float)w);
+        this.seed = s;
+        return r;
+    }
+
+    public double getNoise(double x, double y, double z, double w, double u, double v) {
+        return getConfiguredNoise((float)x, (float)y, (float)z, (float)w, (float)u, (float)v);
+    }
+
+    public double getNoiseWithSeed(double x, double y, double z, double w, double u, double v, long seed) {
+        int s = this.seed;
+        this.seed = (int) (seed ^ seed >>> 32);
+        double r = getConfiguredNoise((float)x, (float)y, (float)z, (float)w, (float)u, (float)v);
+        this.seed = s;
+        return r;
     }
 
 
