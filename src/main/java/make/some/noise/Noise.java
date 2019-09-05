@@ -1959,6 +1959,17 @@ public class Noise implements Serializable {
                     default:
                         return singleCubicFractalFBM(x, y, z);
                 }
+            case BOREAL:
+                return singleBoreal(seed, x, y, z);
+            case BOREAL_FRACTAL:
+                switch (fractalType) {
+                    case BILLOW:
+                        return singleBorealFractalBillow(x, y, z);
+                    case RIDGED_MULTI:
+                        return singleBorealFractalRidgedMulti(x, y, z);
+                    default:
+                        return singleBorealFractalFBM(x, y, z);
+                }
             default:
                 return singleSimplex(seed, x, y, z);
         }
@@ -4981,11 +4992,11 @@ public class Noise implements Serializable {
 
     public float singleBoreal(int seed, float x, float y) {
         float c0 = x, c1 = y;
-        final float r = (swayRandomized(seed, c0 + c1) * 0.25f + 1.5f);
-        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1) + cos(c1 * r);
-        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1) + cos(c0 * r);
-        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0) + sin(c1 * r);
-        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1) + sin(c0 * r);
+        final float r = (swayRandomized(seed, c0 + c1) + 1.5f);
+        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1 - r) + cos(c1 + r);
+        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r) + cos(c0 + r * 1.618f);
+        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0 + r) + cos(c1 - r * 2f);
+        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1 + r) + cos(c0 - r * 2.618f);
 //        c0 += swayRandomized(seed, c0 - c1) + swayRandomized(~seed, c1);
 //        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1) - swayRandomized(~(seed * 3), c0);
 //        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0) + swayRandomized(~(seed * 5), c1);
@@ -4993,6 +5004,96 @@ public class Noise implements Serializable {
         return sway(c0 + c1);
     }
 
+    // 3D Boreal Noise
+    public float getBorealFractal(float x, float y, float z) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+
+        switch (fractalType) {
+            case FBM:
+                return singleBorealFractalFBM(x, y, z);
+            case BILLOW:
+                return singleBorealFractalBillow(x, y, z);
+            case RIDGED_MULTI:
+                return singleBorealFractalRidgedMulti(x, y, z);
+            default:
+                return 0;
+        }
+    }
+    
+    private float singleBorealFractalFBM(float x, float y, float z) {
+        int seed = this.seed;
+        float sum = singleBoreal(seed, x, y, z);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+
+            amp *= gain;
+            sum += singleBoreal(seed + i, x, y, z) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleBorealFractalBillow(float x, float y, float z) {
+        int seed = this.seed;
+        float sum = Math.abs(singleBoreal(seed, x, y, z)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleBoreal(seed + i, x, y, z)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+    
+    private float singleBorealFractalRidgedMulti(float x, float y, float z) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleBoreal(seed + i, x, y, z));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
+
+    public float getBoreal(float x, float y, float z) {
+        return singleBoreal(seed, x * frequency, y * frequency, z * frequency);
+    }
+
+    public float singleBoreal(int seed, float x, float y, float z) {
+        float c0 = x, c1 = y, c2 = z;
+        final float r = (swayRandomized(seed, c0 + c1 + c2) + 1.5f);
+
+        c0 += swayRandomized(seed, c1 + c0 + r);
+        c1 += swayRandomized(seed ^ 0x7F4A7C15, c2 + c1 + r) + cos(c0 + r);
+        c2 += swayRandomized(seed ^ 0x9E3779B9, c0 + c2 + r);
+
+        c0 -= swayRandomized(seed, c1 + c2 + r);
+        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c2 + c0 + r);
+        c2 -= swayRandomized(seed ^ 0x9E3779B9, c1 + c2 + r) + cos(c1 + r);
+
+        c0 += swayRandomized(seed, c2 + c0 - r) + cos(c2 + r);
+        c1 += swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r);
+        c2 += swayRandomized(seed ^ 0x9E3779B9, c1 + c2 - r);
+        
+        return sway(c0 + c1 + c2);
+    }
 
 
 
