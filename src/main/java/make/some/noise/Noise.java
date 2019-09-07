@@ -4992,11 +4992,22 @@ public class Noise implements Serializable {
 
     public float singleBoreal(int seed, float x, float y) {
         float c0 = x, c1 = y;
-        final float r = (swayRandomized(seed, c0 + c1) + 1.5f);
-        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1 - r) + cos(c1 + r);
-        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r) + cos(c0 + r * 1.618f);
-        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0 + r) + cos(c1 - r * 2f);
-        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1 + r) + cos(c0 - r * 2.618f);
+        float r = (swayRandomized(seed, c0 + c1) + 1.5f);
+//        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1 - r) + cos(c1 + r);
+//        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r) + cos(c0 + r * 1.618f);
+//        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0 + r) + cos(c1 - r * 2f);
+//        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1 + r) + cos(c0 - r * 2.618f);
+
+//        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1 - r) + sway(r + c0);
+//        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r) + sway(r + c1);
+//        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0 + r) - sway(r + c0);
+//        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1 + r) - sway(r + c1);
+
+        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1 - r) + sway((c1 - r) * 0.1618f);
+        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r) + sway((c0 + r) * 0.2323f);
+        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0 + r) + sway((c1 + r) * 0.2618f);
+        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1 + r) + sway((c0 - r) * 0.3131f);
+        
 //        c0 += swayRandomized(seed, c0 - c1) + swayRandomized(~seed, c1);
 //        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1) - swayRandomized(~(seed * 3), c0);
 //        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0) + swayRandomized(~(seed * 5), c1);
@@ -5275,8 +5286,8 @@ public class Noise implements Serializable {
 
     public static float swayRandomized(int seed, float value) {
         final int floor = value >= 0f ? (int) value : (int) value - 1;
-        final float start = ((((seed += floor) ^ 0xD1B54A35) * 0x1D2473 & 0xFFFFF)) * 0x1p-20f,
-                end = (((seed + 1 ^ 0xD1B54A35) * 0x1D2473 & 0xFFFFF)) * 0x1p-20f;
+        final float start = ((((seed += floor) ^ 0xD1B54A35) * 0x1D2473 & 0x1FFFFF) - 0x100000) * 0x1p-20f,
+                end = (((seed + 1 ^ 0xD1B54A35) * 0x1D2473 & 0x1FFFFF) - 0x100000) * 0x1p-20f;
         value -= floor;
         value *= value * (3f - 2f * value);
         return (1f - value) * start + value * end;
