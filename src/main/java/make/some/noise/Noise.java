@@ -1799,6 +1799,26 @@ public class Noise implements Serializable {
     protected static float gradCoord4D(int seed, int x, int y, int z, int w, float xd, float yd, float zd, float wd) {
         final int hash = hash256(x, y, z, w, seed) & 0xFC;
         return xd * grad4f[hash] + yd * grad4f[hash + 1] + zd * grad4f[hash + 2] + wd * grad4f[hash + 3];
+//        final int hash = hash32(x, y, z, w, seed);
+//        float a = xd, b = yd, c = zd;            // X,Y,Z; FIXED A TYPO IN AUBURNS' REPO
+//        switch (hash >> 3) {          // OR, DEPENDING ON HIGH ORDER 2 BITS:
+//            case 1:
+//                a = wd;
+//                b = xd;
+//                c = yd;
+//                break;     // W,X,Y
+//            case 2:
+//                a = zd;
+//                b = wd;
+//                c = xd;
+//                break;     // Z,W,X
+//            case 3:
+//                a = yd;
+//                b = zd;
+//                c = wd;
+//                break;     // Y,Z,W
+//        }
+//        return ((hash & 4) == 0 ? -a : a) + ((hash & 2) == 0 ? -b : b) + ((hash & 1) == 0 ? -c : c);
     }
 
     protected static float gradCoord6D(int seed, int x, int y, int z, int w, int u, int v,
@@ -2868,7 +2888,8 @@ public class Noise implements Serializable {
 
         final float zf0 = lerp(yf00, yf10, zs);
         final float zf1 = lerp(yf01, yf11, zs);
-        return lerp(zf0, zf1, ws);
+        return lerp(zf0, zf1, ws) * 0.625f;
+
     }
     private float singlePerlinFractalFBM(float x, float y, float z, float w) {
         int seed = this.seed;

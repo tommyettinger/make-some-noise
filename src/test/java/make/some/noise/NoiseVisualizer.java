@@ -5,8 +5,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -24,6 +26,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
     private ImmediateModeRenderer20 renderer;
     private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX_FRACTAL, 3);
     private boolean color = false;
+    private boolean threshold = false;
     private Noise red = new Noise(11111, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     private Noise green = new Noise(33333, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     private Noise blue = new Noise(77777, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
@@ -99,7 +102,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         putMap();
                         break;
                     case D: //dimension
-                        if(dim == 1)
+                        if(dim == 1 && noise.getNoiseType() >= 10)
                         {
                             noise.setNoiseType(0);
                             red.setNoiseType(0);
@@ -110,7 +113,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         putMap();
                         break;
                     case F: // frequency
-                        noise.setFrequency(Noise.sin(freq += 0.125f) * 0.15f + 0.17f);
+                        noise.setFrequency(Noise.sin((TimeUtils.millis() & 0xFFFFFL) * 0x1p-11f) * 0.11f + 0.17f);
                         red.setFrequency(noise.getFrequency());
                         green.setFrequency(noise.getFrequency());
                         blue.setFrequency(noise.getFrequency());
@@ -159,6 +162,9 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         }
                         putMap();
                         break;
+                    case T:
+                        threshold = !threshold;
+                        break;
                     case K: // sKip
                         ctr += 1000;
                         putMap();
@@ -175,8 +181,15 @@ public class NoiseVisualizer extends ApplicationAdapter {
         Gdx.input.setInputProcessor(input);
     }
 
+    private static final float WHITE = Color.WHITE_FLOAT_BITS, BLACK = Color.BLACK.toFloatBits();
     public void putMap() {
+//        noise.setFrequency(Noise.sin((TimeUtils.millis() & 0xFFFFFL) * 0x1p-12f) * 0.03125f + 0.0625f);
+//        red.setFrequency(noise.getFrequency());
+//        green.setFrequency(noise.getFrequency());
+//        blue.setFrequency(noise.getFrequency());
+
         renderer.begin(view.getCamera().combined, GL_POINTS);
+        
         if(color)
         {
             switch (dim) {
@@ -229,6 +242,48 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         }
                     }
                     break;
+            }
+        }
+        else if(threshold){
+            switch (dim){
+                case 0:
+                    for (int x = 0; x < 512; x++) {
+                        for (int y = 0; y < 512; y++) {
+                            renderer.color(noise.getConfiguredNoise(x + ctr * 0.25f, y + ctr * 0.25f) >= 0f ? WHITE : BLACK);
+                            renderer.vertex(x, y, 0);
+                        }
+                    }
+                    break;
+                case 1:
+                    for (int x = 0; x < 512; x++) {
+                        for (int y = 0; y < 512; y++) {
+                            renderer.color(noise.getConfiguredNoise(x, y, ctr) >= 0f ? WHITE : BLACK);
+                            renderer.vertex(x, y, 0);
+                        }
+                    }
+                    break;
+                case 2:
+                    for (int x = 0; x < 512; x++) {
+                        for (int y = 0; y < 512; y++) {
+                            renderer.color(noise.getConfiguredNoise(x, y, ctr, 0x1p-4f * (x + y - ctr)) >= 0f ? WHITE : BLACK);
+                            renderer.vertex(x, y, 0);
+                        }
+                    }
+                    break;
+                case 3:
+                    float xx, yy;
+                    for (int x = 0; x < 512; x++) {
+                        xx = x * 0x1p-4f;
+                        for (int y = 0; y < 512; y++) {
+                            yy = y * 0x1p-4f;
+                            renderer.color(noise.getConfiguredNoise(
+                                    ctr + xx, x + ctr, y - ctr,
+                                    ctr - yy, x +  yy, y - xx) >= 0f ? WHITE : BLACK);
+                            renderer.vertex(x, y, 0);
+                        }
+                    }
+                    break;
+                
             }
         }
         else 
