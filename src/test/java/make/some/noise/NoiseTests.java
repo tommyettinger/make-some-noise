@@ -1,5 +1,6 @@
 package make.some.noise;
 
+import org.huldra.math.BigInt;
 import org.junit.Test;
 
 /**
@@ -152,7 +153,7 @@ public class NoiseTests {
 	@Test
 	public void testRangeFBM4D()
 	{
-		Noise noise = new Noise(543212345, 3.14159265f, Noise.PERLIN_FRACTAL, 1, 2f, 0.5f);
+		Noise noise = new Noise(543212345, 3.14159265f, Noise.SIMPLEX_FRACTAL, 1, 2f, 0.5f);
 		noise.setFractalType(Noise.FBM);
 		long state = 12345678L;
 		float x, y, z, w, result;
@@ -342,6 +343,60 @@ public class NoiseTests {
 				lower++;
 		}
 		System.out.println("RidgedInverse 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+	}
+
+	@Test
+	public void testAverageSimplexFBM3D()
+	{
+		Noise noise = new Noise(543212345, 3.14159265f, Noise.SIMPLEX_FRACTAL, 4, 2f, 0.5f);
+		noise.setFractalType(Noise.FBM);
+		long state = 12345678L;
+		float x, y, z;
+		BigInt big = new BigInt(0);
+		for (int i = 0; i < 0x10000; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			big.add(Math.round(4096 * noise.getNoiseWithSeed(x, y, z, (int)state)));
+		}
+		big.div(65536);
+		System.out.println("Simplex FBM 3D average(in range [-4096,4096])="+big.toString());
+	}
+
+	@Test
+	public void testAveragePerlinFBM3D()
+	{
+		Noise noise = new Noise(543212345, 3.14159265f, Noise.PERLIN_FRACTAL, 4, 2f, 0.5f);
+		noise.setFractalType(Noise.FBM);
+		long state = 12345678L;
+		float x, y, z;
+		BigInt big = new BigInt(0);
+		for (int i = 0; i < 0x10000; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			big.add(Math.round(4096 * noise.getNoiseWithSeed(x, y, z, (int)state)));
+		}
+		big.div(65536);
+		System.out.println("Perlin FBM 3D average(in range [-4096,4096])="+big.toString());
+	}
+
+	@Test
+	public void testAverageCubicFBM3D()
+	{
+		Noise noise = new Noise(543212345, 3.14159265f, Noise.CUBIC_FRACTAL, 4, 2f, 0.5f);
+		noise.setFractalType(Noise.FBM);
+		long state = 12345678L;
+		float x, y, z;
+		BigInt big = new BigInt(0);
+		for (int i = 0; i < 0x10000; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+			big.add(Math.round(4096 * noise.getNoiseWithSeed(x, y, z, (int)state)));
+		}
+		big.div(65536);
+		System.out.println("Cubic FBM 3D average(in range [-4096,4096])="+big.toString());
 	}
 
 }
