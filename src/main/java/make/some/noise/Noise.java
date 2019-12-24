@@ -342,6 +342,83 @@ public class Noise implements Serializable {
             s ^= x * 0x1CC1C5 ^ y * 0x19D7AF ^ z * 0x173935 ^ w * 0x14DEAF ^ u * 0x12C139 ^ v * 0x10DAA3;
             return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 27;
         }
+
+
+    /**
+     * A 11-bit point hash that smashes x and y into s using XOR and multiplications by harmonious numbers,
+     * then runs a simple unary hash on s and returns it. Has better performance than HastyPointHash, especially for
+     * ints, and has slightly fewer collisions in a hash table of points. GWT-optimized. Inspired by Pelle Evensen's
+     * rrxmrrxmsx_0 unary hash, though this doesn't use its code or its full algorithm. The unary hash used here has
+     * been stripped down heavily, both for speed and because unless points are selected specifically to target
+     * flaws in the hash, it doesn't need the intense resistance to bad inputs that rrxmrrxmsx_0 has.
+     * @param x x position, as an int
+     * @param y y position, as an int
+     * @param s any int, a seed to be able to produce many hashes for a given point
+     * @return 11-bit hash of the x,y point with the given state s
+     */
+    public static int hash2048(int x, int y, int s) {
+        s ^= x * 0x1827F5 ^ y * 0x123C21;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 21;
+    }
+    /**
+     * A 11-bit point hash that smashes x, y, and z into s using XOR and multiplications by harmonious numbers,
+     * then runs a simple unary hash on s and returns it. Has better performance than HastyPointHash, especially for
+     * ints, and has slightly fewer collisions in a hash table of points. GWT-optimized. Inspired by Pelle Evensen's
+     * rrxmrrxmsx_0 unary hash, though this doesn't use its code or its full algorithm. The unary hash used here has
+     * been stripped down heavily, both for speed and because unless points are selected specifically to target
+     flaws in the hash, it doesn't need the intense resistance to bad inputs that rrxmrrxmsx_0 has.
+     * @param x x position, as an int
+     * @param y y position, as an int
+     * @param z z position, as an int
+     * @param s any int, a seed to be able to produce many hashes for a given point
+     * @return 11-bit hash of the x,y,z point with the given state s
+     */
+    public static int hash2048(int x, int y, int z, int s) {
+        s ^= x * 0x1A36A9 ^ y * 0x157931 ^ z * 0x119725;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 21;
+    }
+
+    /**
+     * A 11-bit point hash that smashes x, y, z, and w into s using XOR and multiplications by harmonious numbers,
+     * then runs a simple unary hash on s and returns it. Has better performance than HastyPointHash, especially for
+     * ints, and has slightly fewer collisions in a hash table of points. GWT-optimized. Inspired by Pelle Evensen's
+     * rrxmrrxmsx_0 unary hash, though this doesn't use its code or its full algorithm. The unary hash used here has
+     * been stripped down heavily, both for speed and because unless points are selected specifically to target
+     * flaws in the hash, it doesn't need the intense resistance to bad inputs that rrxmrrxmsx_0 has.
+     * @param x x position, as an int
+     * @param y y position, as an int
+     * @param z z position, as an int
+     * @param w w position, as an int
+     * @param s any int, a seed to be able to produce many hashes for a given point
+     * @return 11-bit hash of the x,y,z,w point with the given state s
+     */
+    public static int hash2048(int x, int y, int z, int w, int s) {
+        s ^= x * 0x1B69E1 ^ y * 0x177C0B ^ z * 0x141E5D ^ w * 0x113C31;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 21;
+    }
+
+    /**
+     * A 11-bit point hash that smashes x, y, z, w, u, and v into s using XOR and multiplications by harmonious
+     * numbers, then runs a simple unary hash on s and returns it. Has better performance than HastyPointHash,
+     * especially for ints, and has slightly fewer collisions in a hash table of points. GWT-optimized. Inspired by
+     * Pelle Evensen's rrxmrrxmsx_0 unary hash, though this doesn't use its code or its full algorithm. The unary
+     * hash used here has been stripped down heavily, both for speed and because unless points are selected
+     * specifically to target flaws in the hash, it doesn't need the intense resistance to bad inputs that
+     * rrxmrrxmsx_0 has.
+     * @param x x position, as an int
+     * @param y y position, as an int
+     * @param z z position, as an int
+     * @param w w position, as an int
+     * @param u u position, as an int
+     * @param v v position, as an int
+     * @param s any int, a seed to be able to produce many hashes for a given point 
+     * @return 11-bit hash of the x,y,z,w,u,v point with the given state s
+     */
+    public static int hash2048(int x, int y, int z, int w, int u, int v, int s) {
+        s ^= x * 0x1CC1C5 ^ y * 0x19D7AF ^ z * 0x173935 ^ w * 0x14DEAF ^ u * 0x12C139 ^ v * 0x10DAA3;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 21;
+    }
+
     protected static final float[][] phiGrad2f = {
             {0.6499429579167653f, 0.759982994187637f},
             {-0.1551483029088119f, 0.9878911904175052f},
@@ -1356,7 +1433,7 @@ public class Noise implements Serializable {
     private static final long serialVersionUID = 2L;
     public static final int VALUE = 0, VALUE_FRACTAL = 1, PERLIN = 2, PERLIN_FRACTAL = 3,
             SIMPLEX = 4, SIMPLEX_FRACTAL = 5, CELLULAR = 6, WHITE_NOISE = 7, CUBIC = 8, CUBIC_FRACTAL = 9,
-            BOREAL = 10, BOREAL_FRACTAL = 11;
+            SUPER_SIMPLEX = 10, SUPER_SIMPLEX_FRACTAL = 11;
 
     public static final int LINEAR = 0, HERMITE = 1, QUINTIC = 2;
 
@@ -1894,17 +1971,28 @@ public class Noise implements Serializable {
                     default:
                         return singleCubicFractalFBM(x, y);
                 }
-            case BOREAL:
-                return singleBoreal(seed, x, y);
-            case BOREAL_FRACTAL:
+            case SUPER_SIMPLEX:
+                return singleSuperSimplex(seed, x, y);
+            case SUPER_SIMPLEX_FRACTAL:
                 switch (fractalType) {
                     case BILLOW:
-                        return singleBorealFractalBillow(x, y);
+                        return singleSuperSimplexFractalBillow(x, y);
                     case RIDGED_MULTI:
-                        return singleBorealFractalRidgedMulti(x, y);
+                        return singleSuperSimplexFractalRidgedMulti(x, y);
                     default:
-                        return singleBorealFractalFBM(x, y);
+                        return singleSuperSimplexFractalFBM(x, y);
                 }
+//            case BOREAL:
+//                return singleBoreal(seed, x, y);
+//            case BOREAL_FRACTAL:
+//                switch (fractalType) {
+//                    case BILLOW:
+//                        return singleBorealFractalBillow(x, y);
+//                    case RIDGED_MULTI:
+//                        return singleBorealFractalRidgedMulti(x, y);
+//                    default:
+//                        return singleBorealFractalFBM(x, y);
+//                }
             default:
                 return singleSimplex(seed, x, y);
         }
@@ -1979,9 +2067,9 @@ public class Noise implements Serializable {
                     default:
                         return singleCubicFractalFBM(x, y, z);
                 }
-            case BOREAL:
+            case SUPER_SIMPLEX:
                 return singleBoreal(seed, x, y, z);
-            case BOREAL_FRACTAL:
+            case SUPER_SIMPLEX_FRACTAL:
                 switch (fractalType) {
                     case BILLOW:
                         return singleBorealFractalBillow(x, y, z);
@@ -3460,7 +3548,6 @@ public class Noise implements Serializable {
     {
         x *= frequency;
         y *= frequency;
-
         float sum = 0, amp = 1, ampBias = 1f, spike;
         for (int i = 0; i < octaves; i++) {
             spike = 1f - Math.abs(singleSimplex(seed + i, x, y));
@@ -5127,6 +5214,183 @@ public class Noise implements Serializable {
         return sway(c0 + c1 + c2);
     }
 
+
+    //SuperSimplex
+
+    private static class LatticePoint2D {
+        int xsv, ysv;
+        float dx, dy;
+        public LatticePoint2D(int xsv, int ysv) {
+            this.xsv = xsv; this.ysv = ysv;
+            float ssv = (xsv + ysv) * -0.21132487f;
+            this.dx = -xsv - ssv;
+            this.dy = -ysv - ssv;
+        }
+    }
+
+    private static final LatticePoint2D[] LOOKUP_2D = new LatticePoint2D[] {
+            new LatticePoint2D(0, 0),
+            new LatticePoint2D(1, 1),
+            new LatticePoint2D(-1, 0),
+            new LatticePoint2D(0, -1),
+            new LatticePoint2D(0, 0),
+            new LatticePoint2D(1, 1),
+            new LatticePoint2D(0, 1),
+            new LatticePoint2D(1, 0),
+            new LatticePoint2D(0, 0),
+            new LatticePoint2D(1, 1),
+            new LatticePoint2D(1, 0),
+            new LatticePoint2D(0, -1),
+            new LatticePoint2D(0, 0),
+            new LatticePoint2D(1, 1),
+            new LatticePoint2D(2, 1),
+            new LatticePoint2D(1, 0),
+            new LatticePoint2D(0, 0),
+            new LatticePoint2D(1, 1),
+            new LatticePoint2D(-1, 0),
+            new LatticePoint2D(0, 1),
+            new LatticePoint2D(0, 0),
+            new LatticePoint2D(1, 1),
+            new LatticePoint2D(0, 1),
+            new LatticePoint2D(1, 2),
+            new LatticePoint2D(0, 0),
+            new LatticePoint2D(1, 1),
+            new LatticePoint2D(1, 0),
+            new LatticePoint2D(0, 1),
+            new LatticePoint2D(0, 0),
+            new LatticePoint2D(1, 1),
+            new LatticePoint2D(2, 1),
+            new LatticePoint2D(1, 2),
+    };
+    	private static final Float2[] GRADIENTS_2D = new Float2[] {
+			new Float2(0.0f, 18.579874f),
+			new Float2(9.289937f, 16.090643f),
+			new Float2(16.090643f, 9.289937f),
+			new Float2(18.579874f, 0.0f),
+			new Float2(16.090643f, -9.289937f),
+			new Float2(9.289937f, -16.090643f),
+			new Float2(0.0f, -18.579874f),
+			new Float2(-9.289937f, -16.090643f),
+			new Float2(-16.090643f, -9.289937f),
+			new Float2(-18.579874f, 0.0f),
+			new Float2(-16.090643f, 9.289937f),
+			new Float2(-9.289937f, 16.090643f),
+
+			new Float2(0.0f, 18.579874f),
+			new Float2(9.289937f, 16.090643f),
+			new Float2(16.090643f, 9.289937f),
+			new Float2(18.579874f, 0.0f),
+			new Float2(16.090643f, -9.289937f),
+			new Float2(9.289937f, -16.090643f),
+			new Float2(0.0f, -18.579874f),
+			new Float2(-9.289937f, -16.090643f),
+			new Float2(-16.090643f, -9.289937f),
+			new Float2(-18.579874f, 0.0f),
+			new Float2(-16.090643f, 9.289937f),
+			new Float2(-9.289937f, 16.090643f),
+
+			new Float2(9.289937f, 16.090643f),
+			new Float2(16.090643f, 9.289937f),
+			new Float2(18.579874f, 0.0f),
+			new Float2(9.289937f, -16.090643f),
+			new Float2(0.0f, -18.579874f),
+			new Float2(-9.289937f, -16.090643f),
+			new Float2(-16.090643f, 9.289937f),
+			new Float2(-9.289937f, 16.090643f),
+	};
+
+
+    private float singleSuperSimplexFractalFBM(float x, float y) {
+        int seed = this.seed;
+        float sum = singleSuperSimplex(seed, x, y);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+
+            amp *= gain;
+            sum += singleSuperSimplex(seed + i, x, y) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleSuperSimplexFractalBillow(float x, float y) {
+        int seed = this.seed;
+        float sum = Math.abs(singleSuperSimplex(seed, x, y)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleSuperSimplex(++seed, x, y)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleSuperSimplexFractalRidgedMulti(float x, float y) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleSuperSimplex(seed + i, x, y));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
+
+    public float getSuperSimplex(float x, float y) {
+        return singleSuperSimplex(seed, x * frequency, y * frequency);
+    }
+
+
+
+    public float singleSuperSimplex(int seed, float x, float y) {
+        float value = 0;
+
+        // Get points for A2* lattice
+        float s = 0.366025403784439f * (x + y);
+        float xs = x + s, ys = y + s;
+
+        // Get base points and offsets
+        int xsb = fastFloor(xs), ysb = fastFloor(ys);
+        float xsi = xs - xsb, ysi = ys - ysb;
+
+        // Index to point list
+        int a = (int)(xsi + ysi);
+        int index =
+                (a << 2) |
+                        (int)(xsi + 1 - (ysi + a) * 0.5f) << 3 |
+                        (int)(ysi + 1 - (xsi + a) * 0.5f) << 4;
+
+        float ssi = (xsi + ysi) * -0.21132487f;
+        float xi = xsi + ssi, yi = ysi + ssi;
+
+        // Point contributions
+        for (int i = 0; i < 4; i++) {
+            LatticePoint2D c = LOOKUP_2D[index + i];
+
+            float dx = xi + c.dx, dy = yi + c.dy;
+            float attn = 0.6666667f - dx * dx - dy * dy;
+            if (attn <= 0) continue;
+
+            Float2 grad = GRADIENTS_2D[hash32((xsb + c.xsv), (ysb + c.ysv), seed)];
+            float extrapolation = grad.x * dx + grad.y * dy;
+
+            attn *= attn;
+            value += attn * attn * extrapolation;
+        }
+
+        return value;
+    }
 
 
 
