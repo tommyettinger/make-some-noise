@@ -2116,44 +2116,55 @@ public class Noise implements Serializable {
      * @param w
      * @return noise as a float from -1f to 1f
      */
-    public float getConfiguredNoise(float x, float y, float z, float w) {
+    public float getConfiguredNoise (float x, float y, float z, float w) {
         x *= frequency;
         y *= frequency;
         z *= frequency;
         w *= frequency;
 
         switch (noiseType) {
-            case VALUE:
-                return singleValue(seed, x, y, z, w);
-            case VALUE_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleValueFractalBillow(x, y, z, w);
-                    case RIDGED_MULTI:
-                        return singleValueFractalRidgedMulti(x, y, z, w);
-                    default:
-                        return singleValueFractalFBM(x, y, z, w);
-                }
-            case PERLIN:
-                return singlePerlin(seed, x, y, z, w);
-            case PERLIN_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singlePerlinFractalBillow(x, y, z, w);
-                    case RIDGED_MULTI:
-                        return singlePerlinFractalRidgedMulti(x, y, z, w);
-                    default:
-                        return singlePerlinFractalFBM(x, y, z, w);
-                }
-            case SIMPLEX_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleSimplexFractalBillow(x, y, z, w);
-                    case RIDGED_MULTI:
-                        return singleSimplexFractalRidgedMulti(x, y, z, w);
-                    default:
-                        return singleSimplexFractalFBM(x, y, z, w);
-                }
+        case VALUE:
+            return singleValue(seed, x, y, z, w);
+        case VALUE_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleValueFractalBillow(x, y, z, w);
+            case RIDGED_MULTI:
+                return singleValueFractalRidgedMulti(x, y, z, w);
+            default:
+                return singleValueFractalFBM(x, y, z, w);
+            }
+        case VALUE_WIDE:
+            return singleWideValue(seed, x, y, z, w);
+        case VALUE_WIDE_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleWideValueFractalBillow(x, y, z, w);
+            case RIDGED_MULTI:
+                return singleWideValueFractalRidgedMulti(x, y, z, w);
+            default:
+                return singleWideValueFractalFBM(x, y, z, w);
+            }
+        case PERLIN:
+            return singlePerlin(seed, x, y, z, w);
+        case PERLIN_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singlePerlinFractalBillow(x, y, z, w);
+            case RIDGED_MULTI:
+                return singlePerlinFractalRidgedMulti(x, y, z, w);
+            default:
+                return singlePerlinFractalFBM(x, y, z, w);
+            }
+        case SIMPLEX_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleSimplexFractalBillow(x, y, z, w);
+            case RIDGED_MULTI:
+                return singleSimplexFractalRidgedMulti(x, y, z, w);
+            default:
+                return singleSimplexFractalFBM(x, y, z, w);
+            }
 //            case CELLULAR:
 //                switch (cellularReturnType) {
 //                    case CELL_VALUE:
@@ -2163,10 +2174,10 @@ public class Noise implements Serializable {
 //                    default:
 //                        return singleCellular2Edge(x, y, z);
 //                }
-            case WHITE_NOISE:
-                return getWhiteNoise(x, y, z, w);
-            default:
-                return singleSimplex(seed, x, y, z, w);
+        case WHITE_NOISE:
+            return getWhiteNoise(x, y, z, w);
+        default:
+            return singleSimplex(seed, x, y, z, w);
         }
     }
 
@@ -2411,7 +2422,59 @@ public class Noise implements Serializable {
                 return singleValueFractalFBM(x, y, z, w);
         }
     }
+    
+    private float singleValueFractalFBM(float x, float y, float z, float w) {
+        int seed = this.seed;
+        float sum = singleValue(seed, x, y, z, w);
+        float amp = 1;
 
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+
+            amp *= gain;
+            sum += singleValue(++seed, x, y, z, w) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleValueFractalBillow(float x, float y, float z, float w) {
+        int seed = this.seed;
+        float sum = Math.abs(singleValue(seed, x, y, z, w)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleValue(++seed, x, y, z, w)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleValueFractalRidgedMulti(float x, float y, float z, float w) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleValue(seed + i, x, y, z, w));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
 
     public float getValue(float x, float y, float z, float w) {
         return singleValue(seed, x * frequency, y * frequency, z * frequency, w * frequency);
@@ -2467,58 +2530,6 @@ public class Noise implements Serializable {
         final float zf0 = lerp(yf00, yf10, zs);
         final float zf1 = lerp(yf01, yf11, zs);
         return lerp(zf0, zf1, ws);
-    }
-    private float singleValueFractalFBM(float x, float y, float z, float w) {
-        int seed = this.seed;
-        float sum = singleValue(seed, x, y, z, w);
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-
-            amp *= gain;
-            sum += singleValue(++seed, x, y, z, w) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singleValueFractalBillow(float x, float y, float z, float w) {
-        int seed = this.seed;
-        float sum = Math.abs(singleValue(seed, x, y, z, w)) * 2 - 1;
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-
-            amp *= gain;
-            sum += (Math.abs(singleValue(++seed, x, y, z, w)) * 2 - 1) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singleValueFractalRidgedMulti(float x, float y, float z, float w) {
-        int seed = this.seed;
-        float sum = 0, amp = 1, ampBias = 1f, spike;
-        for (int i = 0; i < octaves; i++) {
-            spike = 1f - Math.abs(singleValue(seed + i, x, y, z, w));
-            spike *= spike * amp;
-            amp = Math.max(0f, Math.min(1f, spike * 2f));
-            sum += (spike * ampBias);
-            ampBias *= 2f;
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-        }
-        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getValueFractal(float x, float y) {
@@ -3046,6 +3057,117 @@ public class Noise implements Serializable {
             ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor, zFloor + 0xA0F2F, seed))
                 + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed)))
         ) * (0x1.0040100401004p-10f);
+    }
+    public float getWideValueFractal(float x, float y, float z, float w) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+        w *= frequency;
+
+        switch (fractalType) {
+        case BILLOW:
+            return singleWideValueFractalBillow(x, y, z, w);
+        case RIDGED_MULTI:
+            return singleWideValueFractalRidgedMulti(x, y, z, w);
+        default:
+            return singleWideValueFractalFBM(x, y, z, w);
+        }
+    }
+
+    private float singleWideValueFractalFBM(float x, float y, float z, float w) {
+        int seed = this.seed;
+        float sum = singleWideValue(seed, x, y, z, w);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+
+            amp *= gain;
+            sum += singleWideValue(++seed, x, y, z, w) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleWideValueFractalBillow(float x, float y, float z, float w) {
+        int seed = this.seed;
+        float sum = Math.abs(singleWideValue(seed, x, y, z, w)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleWideValue(++seed, x, y, z, w)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleWideValueFractalRidgedMulti(float x, float y, float z, float w) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleWideValue(seed + i, x, y, z, w));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
+
+    public float getWideValue(float x, float y, float z, float w) {
+        return singleWideValue(seed, x * frequency, y * frequency, z * frequency, w * frequency);
+    }
+
+    private float singleWideValue(int seed, float x, float y, float z, float w) {
+        return valueNoiseWide(seed, x, y, z, w) * 2 - 1;
+    }
+    public static float valueNoiseWide(int seed, float x, float y, float z, float w)
+    {
+        int xFloor = x >= 0 ? (int) x : (int) x - 1;
+        x -= xFloor;
+        x *= x * (3 - 2 * x);
+        int yFloor = y >= 0 ? (int) y : (int) y - 1;
+        y -= yFloor;
+        y *= y * (3 - 2 * y);
+        int zFloor = z >= 0 ? (int) z : (int) z - 1;
+        z -= zFloor;
+        z *= z * (3 - 2 * z);
+        int wFloor = w >= 0 ? (int) w : (int) w - 1;
+        w -= wFloor;
+        w *= w * (3 - 2 * w);
+        //0xE19B1, 0xC6D1D, 0xAF36D, 0x9A695
+        xFloor *= 0xE19B1;
+        yFloor *= 0xC6D1D;
+        zFloor *= 0xAF36D;
+        wFloor *= 0x9A695;
+        return ((1 - w) *
+            ((1 - z) *
+                ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor, wFloor, seed))
+                    + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor, wFloor, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor, wFloor, seed)))
+                + z *
+                ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xAF36D, wFloor, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor + 0xAF36D, wFloor, seed))
+                    + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor, seed))))
+            + (w *
+            ((1 - z) *
+                ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor, wFloor + 0x9A695, seed))
+                    + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor, wFloor + 0x9A695, seed)))
+                + z *
+                ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xAF36D, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor + 0xAF36D, wFloor + 0x9A695, seed))
+                    + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor + 0x9A695, seed)))
+            ))) * (0x1.0040100401004p-10f);
     }
 
 
