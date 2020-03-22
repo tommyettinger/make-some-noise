@@ -102,7 +102,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         putMap();
                         break;
                     case D: //dimension
-                        if(dim == 1 && noise.getNoiseType() >= 10)
+                        if(dim > 1 && noise.getNoiseType() >= 10)
                         {
                             noise.setNoiseType(0);
                             red.setNoiseType(0);

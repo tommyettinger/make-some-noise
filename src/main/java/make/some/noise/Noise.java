@@ -1914,26 +1914,26 @@ public class Noise implements Serializable {
      * @param y
      * @return noise as a float from -1f to 1f
      */
-    public float getConfiguredNoise(float x, float y) {
+    public float getConfiguredNoise (float x, float y) {
         x *= frequency;
         y *= frequency;
 
         switch (noiseType) {
-            case VALUE:
-                return singleValue(seed, x, y);
-            case VALUE_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleValueFractalBillow(x, y);
-                    case RIDGED_MULTI:
-                        return singleValueFractalRidgedMulti(x, y);
-                    default:
-                        return singleValueFractalFBM(x, y);
-                }
+        case VALUE:
+            return singleValue(seed, x, y);
+        case VALUE_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleValueFractalBillow(x, y);
+            case RIDGED_MULTI:
+                return singleValueFractalRidgedMulti(x, y);
+            default:
+                return singleValueFractalFBM(x, y);
+            }
         case VALUE_WIDE:
             return singleWideValue(seed, x, y);
         case VALUE_WIDE_FRACTAL:
-            switch (fractalType){
+            switch (fractalType) {
             case BILLOW:
                 return singleWideValueFractalBillow(x, y);
             case RIDGED_MULTI:
@@ -1941,59 +1941,59 @@ public class Noise implements Serializable {
             default:
                 return singleWideValueFractalFBM(x, y);
             }
-            case PERLIN:
-                return singlePerlin(seed, x, y);
-            case PERLIN_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singlePerlinFractalBillow(x, y);
-                    case RIDGED_MULTI:
-                        return singlePerlinFractalRidgedMulti(x, y);
-                    default:
-                        return singlePerlinFractalFBM(x, y);
-                }
-            case SIMPLEX_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleSimplexFractalBillow(x, y);
-                    case RIDGED_MULTI:
-                        return singleSimplexFractalRidgedMulti(x, y);
-                    default:
-                        return singleSimplexFractalFBM(x, y);
-                }
-            case CELLULAR:
-                switch (cellularReturnType) {
-                    case CELL_VALUE:
-                    case NOISE_LOOKUP:
-                    case DISTANCE:
-                        return singleCellular(x, y);
-                    default:
-                        return singleCellular2Edge(x, y);
-                }
-            case WHITE_NOISE:
-                return getWhiteNoise(x, y);
-            case CUBIC:
-                return singleCubic(seed, x, y);
-            case CUBIC_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleCubicFractalBillow(x, y);
-                    case RIDGED_MULTI:
-                        return singleCubicFractalRidgedMulti(x, y);
-                    default:
-                        return singleCubicFractalFBM(x, y);
-                }
-            case SUPER_SIMPLEX:
-                return singleSuperSimplex(seed, x, y);
-            case SUPER_SIMPLEX_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleSuperSimplexFractalBillow(x, y);
-                    case RIDGED_MULTI:
-                        return singleSuperSimplexFractalRidgedMulti(x, y);
-                    default:
-                        return singleSuperSimplexFractalFBM(x, y);
-                }
+        case PERLIN:
+            return singlePerlin(seed, x, y);
+        case PERLIN_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singlePerlinFractalBillow(x, y);
+            case RIDGED_MULTI:
+                return singlePerlinFractalRidgedMulti(x, y);
+            default:
+                return singlePerlinFractalFBM(x, y);
+            }
+        case SIMPLEX_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleSimplexFractalBillow(x, y);
+            case RIDGED_MULTI:
+                return singleSimplexFractalRidgedMulti(x, y);
+            default:
+                return singleSimplexFractalFBM(x, y);
+            }
+        case CELLULAR:
+            switch (cellularReturnType) {
+            case CELL_VALUE:
+            case NOISE_LOOKUP:
+            case DISTANCE:
+                return singleCellular(x, y);
+            default:
+                return singleCellular2Edge(x, y);
+            }
+        case WHITE_NOISE:
+            return getWhiteNoise(x, y);
+        case CUBIC:
+            return singleCubic(seed, x, y);
+        case CUBIC_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleCubicFractalBillow(x, y);
+            case RIDGED_MULTI:
+                return singleCubicFractalRidgedMulti(x, y);
+            default:
+                return singleCubicFractalFBM(x, y);
+            }
+        case SUPER_SIMPLEX:
+            return singleSuperSimplex(seed, x, y);
+        case SUPER_SIMPLEX_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleSuperSimplexFractalBillow(x, y);
+            case RIDGED_MULTI:
+                return singleSuperSimplexFractalRidgedMulti(x, y);
+            default:
+                return singleSuperSimplexFractalFBM(x, y);
+            }
 //            case BOREAL:
 //                return singleBoreal(seed, x, y);
 //            case BOREAL_FRACTAL:
@@ -2005,8 +2005,8 @@ public class Noise implements Serializable {
 //                    default:
 //                        return singleBorealFractalFBM(x, y);
 //                }
-            default:
-                return singleSimplex(seed, x, y);
+        default:
+            return singleSimplex(seed, x, y);
         }
     }
 
@@ -2020,78 +2020,89 @@ public class Noise implements Serializable {
      * @param z
      * @return noise as a float from -1f to 1f
      */
-    public float getConfiguredNoise(float x, float y, float z) {
+    public float getConfiguredNoise (float x, float y, float z) {
         x *= frequency;
         y *= frequency;
         z *= frequency;
 
         switch (noiseType) {
-            case VALUE:
-                return singleValue(seed, x, y, z);
-            case VALUE_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleValueFractalBillow(x, y, z);
-                    case RIDGED_MULTI:
-                        return singleValueFractalRidgedMulti(x, y, z);
-                    default:
-                        return singleValueFractalFBM(x, y, z);
-                }
-            case PERLIN:
-                return singlePerlin(seed, x, y, z);
-            case PERLIN_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singlePerlinFractalBillow(x, y, z);
-                    case RIDGED_MULTI:
-                        return singlePerlinFractalRidgedMulti(x, y, z);
-                    default:
-                        return singlePerlinFractalFBM(x, y, z);
-                }
-            case SIMPLEX_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleSimplexFractalBillow(x, y, z);
-                    case RIDGED_MULTI:
-                        return singleSimplexFractalRidgedMulti(x, y, z);
-                    default:
-                        return singleSimplexFractalFBM(x, y, z);
-                }
-            case CELLULAR:
-                switch (cellularReturnType) {
-                    case CELL_VALUE:
-                    case NOISE_LOOKUP:
-                    case DISTANCE:
-                        return singleCellular(x, y, z);
-                    default:
-                        return singleCellular2Edge(x, y, z);
-                }
-            case WHITE_NOISE:
-                return getWhiteNoise(x, y, z);
-            case CUBIC:
-                return singleCubic(seed, x, y, z);
-            case CUBIC_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleCubicFractalBillow(x, y, z);
-                    case RIDGED_MULTI:
-                        return singleCubicFractalRidgedMulti(x, y, z);
-                    default:
-                        return singleCubicFractalFBM(x, y, z);
-                }
-            case SUPER_SIMPLEX:
-                return singleBoreal(seed, x, y, z);
-            case SUPER_SIMPLEX_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleBorealFractalBillow(x, y, z);
-                    case RIDGED_MULTI:
-                        return singleBorealFractalRidgedMulti(x, y, z);
-                    default:
-                        return singleBorealFractalFBM(x, y, z);
-                }
+        case VALUE:
+            return singleValue(seed, x, y, z);
+        case VALUE_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleValueFractalBillow(x, y, z);
+            case RIDGED_MULTI:
+                return singleValueFractalRidgedMulti(x, y, z);
             default:
-                return singleSimplex(seed, x, y, z);
+                return singleValueFractalFBM(x, y, z);
+            }
+        case VALUE_WIDE:
+            return singleWideValue(seed, x, y, z);
+        case VALUE_WIDE_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleWideValueFractalBillow(x, y, z);
+            case RIDGED_MULTI:
+                return singleWideValueFractalRidgedMulti(x, y, z);
+            default:
+                return singleWideValueFractalFBM(x, y, z);
+            }
+        case PERLIN:
+            return singlePerlin(seed, x, y, z);
+        case PERLIN_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singlePerlinFractalBillow(x, y, z);
+            case RIDGED_MULTI:
+                return singlePerlinFractalRidgedMulti(x, y, z);
+            default:
+                return singlePerlinFractalFBM(x, y, z);
+            }
+        case SIMPLEX_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleSimplexFractalBillow(x, y, z);
+            case RIDGED_MULTI:
+                return singleSimplexFractalRidgedMulti(x, y, z);
+            default:
+                return singleSimplexFractalFBM(x, y, z);
+            }
+        case CELLULAR:
+            switch (cellularReturnType) {
+            case CELL_VALUE:
+            case NOISE_LOOKUP:
+            case DISTANCE:
+                return singleCellular(x, y, z);
+            default:
+                return singleCellular2Edge(x, y, z);
+            }
+        case WHITE_NOISE:
+            return getWhiteNoise(x, y, z);
+        case CUBIC:
+            return singleCubic(seed, x, y, z);
+        case CUBIC_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleCubicFractalBillow(x, y, z);
+            case RIDGED_MULTI:
+                return singleCubicFractalRidgedMulti(x, y, z);
+            default:
+                return singleCubicFractalFBM(x, y, z);
+            }
+        case SUPER_SIMPLEX:
+            return singleBoreal(seed, x, y, z);
+        case SUPER_SIMPLEX_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleBorealFractalBillow(x, y, z);
+            case RIDGED_MULTI:
+                return singleBorealFractalRidgedMulti(x, y, z);
+            default:
+                return singleBorealFractalFBM(x, y, z);
+            }
+        default:
+            return singleSimplex(seed, x, y, z);
         }
     }
 
@@ -2813,14 +2824,14 @@ public class Noise implements Serializable {
     //y should be premultiplied by 0xABC99
     private static int hashPart1024(final int x, final int y, int s) {
         s += x ^ y;
-        return x + y + (s >>> 3 ^ s >>> 10) & 0x3FF;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 22;
     }
     //x should be premultiplied by 0xDB4F1
     //y should be premultiplied by 0xBBE05
     //z should be premultiplied by 0xA0F2F
     private static int hashPart1024(final int x, final int y, final int z, int s) {
         s += x ^ y ^ z;
-        return x + y + z + (s >>> 3 ^ s >>> 10) & 0x3FF;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 22;
     }
     //x should be premultiplied by 0xE19B1
     //y should be premultiplied by 0xC6D1D
@@ -2828,7 +2839,7 @@ public class Noise implements Serializable {
     //w should be premultiplied by 0x9A695
     private static int hashPart1024(final int x, final int y, final int z, final int w, int s) {
         s += x ^ y ^ z ^ w;
-        return x + y + z + w + (s >>> 3 ^ s >>> 10) & 0x3FF;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 22;
     }
     //x should be premultiplied by 0xE95E1
     //y should be premultiplied by 0xD4BC7
@@ -2838,7 +2849,7 @@ public class Noise implements Serializable {
     //v should be premultiplied by 0x92E85
     private static int hashPart1024(final int x, final int y, final int z, final int w, final int u, final int v, int s) {
         s += x ^ y ^ z ^ w ^ u ^ v;
-        return x + y + z + w + u + v + (s >>> 3 ^ s >>> 10) & 0x3FF;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 22;
     }
 
 
@@ -2920,8 +2931,7 @@ public class Noise implements Serializable {
      * @param y
      * @return noise from 0 to 1.
      */
-    public static float valueNoiseWide (int seed, float x, float y)
-        {
+    private static float valueNoiseWide (int seed, float x, float y) {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
         x *= x * (3 - 2 * x);
@@ -2934,7 +2944,87 @@ public class Noise implements Serializable {
             + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xABC99, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor + 0xABC99, seed)))
             * (0x1.0040100401004p-10f);
     }
-    public static float singleWideValue (int seed, float x, float y, float z)
+    public float getWideValueFractal(float x, float y, float z) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+
+        switch (fractalType) {
+        case BILLOW:
+            return singleWideValueFractalBillow(x, y, z);
+        case RIDGED_MULTI:
+            return singleWideValueFractalRidgedMulti(x, y, z);
+        default:
+            return singleWideValueFractalFBM(x, y, z);
+        }
+    }
+
+    private float singleWideValueFractalFBM(float x, float y, float z) {
+        int seed = this.seed;
+        float sum = singleWideValue(seed, x, y, z);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+
+            amp *= gain;
+            sum += singleWideValue(++seed, x, y, z) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleWideValueFractalBillow(float x, float y, float z) {
+        int seed = this.seed;
+        float sum = Math.abs(singleWideValue(seed, x, y, z)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleWideValue(++seed, x, y, z)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleWideValueFractalRidgedMulti(float x, float y, float z) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleWideValue(seed + i, x, y, z));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
+
+    public float getWideValue(float x, float y, float z) {
+        return singleWideValue(seed, x * frequency, y * frequency, z * frequency);
+    }
+
+    private float singleWideValue(int seed, float x, float y, float z) {
+        return valueNoiseWide(seed, x, y, z) * 2 - 1;
+    }
+    /**
+     * Produces noise from 0 to 1, instead of the normal -1 to 1.
+     * @param seed
+     * @param x
+     * @param y
+     * @param z 
+     * @return noise from 0 to 1.
+     */
+    public static float valueNoiseWide (int seed, float x, float y, float z)
     {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
