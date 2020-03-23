@@ -2835,14 +2835,14 @@ public class Noise implements Serializable {
     //y should be premultiplied by 0xABC99
     private static int hashPart1024(final int x, final int y, int s) {
         s += x ^ y;
-        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 22;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >> 22;
     }
     //x should be premultiplied by 0xDB4F1
     //y should be premultiplied by 0xBBE05
     //z should be premultiplied by 0xA0F2F
     private static int hashPart1024(final int x, final int y, final int z, int s) {
         s += x ^ y ^ z;
-        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 22;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >> 22;
     }
     //x should be premultiplied by 0xE19B1
     //y should be premultiplied by 0xC6D1D
@@ -2850,7 +2850,7 @@ public class Noise implements Serializable {
     //w should be premultiplied by 0x9A695
     private static int hashPart1024(final int x, final int y, final int z, final int w, int s) {
         s += x ^ y ^ z ^ w;
-        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 22;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >> 22;
     }
     //x should be premultiplied by 0xE95E1
     //y should be premultiplied by 0xD4BC7
@@ -2860,7 +2860,7 @@ public class Noise implements Serializable {
     //v should be premultiplied by 0x92E85
     private static int hashPart1024(final int x, final int y, final int z, final int w, final int u, final int v, int s) {
         s += x ^ y ^ z ^ w ^ u ^ v;
-        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >>> 22;
+        return (s ^ (s << 19 | s >>> 13) ^ (s << 5 | s >>> 27) ^ 0xD1B54A35) * 0x125493 >> 22;
     }
 
 
@@ -2932,7 +2932,17 @@ public class Noise implements Serializable {
 
 
     public static float singleWideValue (int seed, float x, float y) {
-        return valueNoiseWide(seed, x, y) * 2 - 1;
+        int xFloor = x >= 0 ? (int) x : (int) x - 1;
+        x -= xFloor;
+        x *= x * (3 - 2 * x);
+        int yFloor = y >= 0 ? (int) y : (int) y - 1;
+        y -= yFloor;
+        y *= y * (3 - 2 * y);
+        xFloor *= 0xD1B55;
+        yFloor *= 0xABC99;
+        return ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor, seed))
+            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xABC99, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor + 0xABC99, seed)))
+            * 0x1p-9f;
     }
 
     /**
@@ -2953,7 +2963,7 @@ public class Noise implements Serializable {
         yFloor *= 0xABC99;
         return ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor, seed))
             + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xABC99, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor + 0xABC99, seed)))
-            * (0x1.0040100401004p-10f);
+            * 0x1p-10f + 0.5f;
     }
     public float getWideValueFractal(float x, float y, float z) {
         x *= frequency;
@@ -3025,7 +3035,26 @@ public class Noise implements Serializable {
     }
 
     private float singleWideValue(int seed, float x, float y, float z) {
-        return valueNoiseWide(seed, x, y, z) * 2 - 1;
+        int xFloor = x >= 0 ? (int) x : (int) x - 1;
+        x -= xFloor;
+        x *= x * (3 - 2 * x);
+        int yFloor = y >= 0 ? (int) y : (int) y - 1;
+        y -= yFloor;
+        y *= y * (3 - 2 * y);
+        int zFloor = z >= 0 ? (int) z : (int) z - 1;
+        z -= zFloor;
+        z *= z * (3 - 2 * z);
+        //0xDB4F1, 0xBBE05, 0xA0F2F
+        xFloor *= 0xDB4F1;
+        yFloor *= 0xBBE05;
+        zFloor *= 0xA0F2F;
+        return ((1 - z) *
+            ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor, zFloor, seed))
+                + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xBBE05, zFloor, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor + 0xBBE05, zFloor, seed)))
+            + z *
+            ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor, zFloor + 0xA0F2F, seed))
+                + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed)))
+        ) * 0x1p-9f;
     }
     /**
      * Produces noise from 0 to 1, instead of the normal -1 to 1.
@@ -3056,7 +3085,8 @@ public class Noise implements Serializable {
             + z *
             ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor, zFloor + 0xA0F2F, seed))
                 + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed)))
-        ) * (0x1.0040100401004p-10f);
+        ) * 0x1p-10f + 0.5f;
+
     }
     public float getWideValueFractal(float x, float y, float z, float w) {
         x *= frequency;
@@ -3132,7 +3162,38 @@ public class Noise implements Serializable {
     }
 
     private float singleWideValue(int seed, float x, float y, float z, float w) {
-        return valueNoiseWide(seed, x, y, z, w) * 2 - 1;
+        int xFloor = x >= 0 ? (int) x : (int) x - 1;
+        x -= xFloor;
+        x *= x * (3 - 2 * x);
+        int yFloor = y >= 0 ? (int) y : (int) y - 1;
+        y -= yFloor;
+        y *= y * (3 - 2 * y);
+        int zFloor = z >= 0 ? (int) z : (int) z - 1;
+        z -= zFloor;
+        z *= z * (3 - 2 * z);
+        int wFloor = w >= 0 ? (int) w : (int) w - 1;
+        w -= wFloor;
+        w *= w * (3 - 2 * w);
+        //0xE19B1, 0xC6D1D, 0xAF36D, 0x9A695
+        xFloor *= 0xE19B1;
+        yFloor *= 0xC6D1D;
+        zFloor *= 0xAF36D;
+        wFloor *= 0x9A695;
+        return ((1 - w) *
+            ((1 - z) *
+                ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor, wFloor, seed))
+                    + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor, wFloor, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor, wFloor, seed)))
+                + z *
+                ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xAF36D, wFloor, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor + 0xAF36D, wFloor, seed))
+                    + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor, seed))))
+            + (w *
+            ((1 - z) *
+                ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor, wFloor + 0x9A695, seed))
+                    + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor, wFloor + 0x9A695, seed)))
+                + z *
+                ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xAF36D, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor + 0xAF36D, wFloor + 0x9A695, seed))
+                    + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor + 0x9A695, seed)))
+            ))) * 0x1p-9f;
     }
     public static float valueNoiseWide(int seed, float x, float y, float z, float w)
     {
@@ -3167,7 +3228,7 @@ public class Noise implements Serializable {
                 + z *
                 ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xAF36D, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor, zFloor + 0xAF36D, wFloor + 0x9A695, seed))
                     + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor + 0x9A695, seed)))
-            ))) * (0x1.0040100401004p-10f);
+            ))) * 0x1p-10f + 0.5f;
     }
 
 
