@@ -2202,17 +2202,28 @@ public class Noise implements Serializable {
         v *= frequency;
 
         switch (noiseType) {
-            case VALUE:
-                return singleValue(seed, x, y, z, w, u, v);
-            case VALUE_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleValueFractalBillow(x, y, z, w, u, v);
-                    case RIDGED_MULTI:
-                        return singleValueFractalRidgedMulti(x, y, z, w, u, v);
-                    default:
-                        return singleValueFractalFBM(x, y, z, w, u, v);
-                }
+        case VALUE:
+            return singleValue(seed, x, y, z, w, u, v);
+        case VALUE_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleValueFractalBillow(x, y, z, w, u, v);
+            case RIDGED_MULTI:
+                return singleValueFractalRidgedMulti(x, y, z, w, u, v);
+            default:
+                return singleValueFractalFBM(x, y, z, w, u, v);
+            }
+        case VALUE_WIDE:
+            return singleWideValue(seed, x, y, z, w, u, v);
+        case VALUE_WIDE_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleWideValueFractalBillow(x, y, z, w, u, v);
+            case RIDGED_MULTI:
+                return singleWideValueFractalRidgedMulti(x, y, z, w, u, v);
+            default:
+                return singleWideValueFractalFBM(x, y, z, w, u, v);
+            }
             case WHITE_NOISE:
                 return getWhiteNoise(x, y, z, w, u, v);
             case PERLIN:
@@ -2644,6 +2655,64 @@ public class Noise implements Serializable {
                 return singleValueFractalFBM(x, y, z, w, u, v);
         }
     }
+    private float singleValueFractalFBM(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = singleValue(seed, x, y, z, w, u, v);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += singleValue(++seed, x, y, z, w, u, v) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleValueFractalBillow(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = Math.abs(singleValue(seed, x, y, z, w, u, v)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleValue(++seed, x, y, z, w, u, v)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleValueFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleValue(seed + i, x, y, z, w, u, v));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
 
     public float getValue(float x, float y, float z, float w, float u, float v) {
         return singleValue(seed, x * frequency, y * frequency, z * frequency, w * frequency, u * frequency, v * frequency);
@@ -2769,64 +2838,6 @@ public class Noise implements Serializable {
         final float uf1 = lerp(wf01, wf11, us);
         
         return lerp(uf0, uf1, vs);
-    }
-    private float singleValueFractalFBM(float x, float y, float z, float w, float u, float v) {
-        int seed = this.seed;
-        float sum = singleValue(seed, x, y, z, w, u, v);
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-            u *= lacunarity;
-            v *= lacunarity;
-
-            amp *= gain;
-            sum += singleValue(++seed, x, y, z, w, u, v) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singleValueFractalBillow(float x, float y, float z, float w, float u, float v) {
-        int seed = this.seed;
-        float sum = Math.abs(singleValue(seed, x, y, z, w, u, v)) * 2 - 1;
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-            u *= lacunarity;
-            v *= lacunarity;
-
-            amp *= gain;
-            sum += (Math.abs(singleValue(++seed, x, y, z, w, u, v)) * 2 - 1) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singleValueFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
-        int seed = this.seed;
-        float sum = 0, amp = 1, ampBias = 1f, spike;
-        for (int i = 0; i < octaves; i++) {
-            spike = 1f - Math.abs(singleValue(seed + i, x, y, z, w, u, v));
-            spike *= spike * amp;
-            amp = Math.max(0f, Math.min(1f, spike * 2f));
-            sum += (spike * ampBias);
-            ampBias *= 2f;
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-            u *= lacunarity;
-            v *= lacunarity;
-        }
-        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     // Alternate value noise, operating on multiple parts of a hash code at a time
@@ -3231,6 +3242,276 @@ public class Noise implements Serializable {
             ))) * 0x1p-10f + 0.5f;
     }
 
+    public float getWideValueFractal(float x, float y, float z, float w, float u, float v) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+        w *= frequency;
+        u *= frequency;
+        v *= frequency;
+
+        switch (fractalType) {
+        case BILLOW:
+            return singleWideValueFractalBillow(x, y, z, w, u, v);
+        case RIDGED_MULTI:
+            return singleWideValueFractalRidgedMulti(x, y, z, w, u, v);
+        default:
+            return singleWideValueFractalFBM(x, y, z, w, u, v);
+        }
+    }
+    private float singleWideValueFractalFBM(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = singleWideValue(seed, x, y, z, w, u, v);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += singleWideValue(++seed, x, y, z, w, u, v) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleWideValueFractalBillow(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = Math.abs(singleWideValue(seed, x, y, z, w, u, v)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleWideValue(++seed, x, y, z, w, u, v)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleWideValueFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleWideValue(seed + i, x, y, z, w, u, v));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
+
+    public float getWideValue(float x, float y, float z, float w, float u, float v) {
+        return singleWideValue(seed, x * frequency, y * frequency, z * frequency, w * frequency, u * frequency, v * frequency);
+    }
+
+    private float singleWideValue(int seed, float x, float y, float z, float w, float u, float v) {
+        int xFloor = x >= 0 ? (int) x : (int) x - 1;
+        x -= xFloor;
+        x *= x * (3 - 2 * x);
+        int yFloor = y >= 0 ? (int) y : (int) y - 1;
+        y -= yFloor;
+        y *= y * (3 - 2 * y);
+        int zFloor = z >= 0 ? (int) z : (int) z - 1;
+        z -= zFloor;
+        z *= z * (3 - 2 * z);
+        int wFloor = w >= 0 ? (int) w : (int) w - 1;
+        w -= wFloor;
+        w *= w * (3 - 2 * w);
+        int uFloor = u >= 0 ? (int) u : (int) u - 1;
+        u -= uFloor;
+        u *= u * (3 - 2 * u);
+        int vFloor = v >= 0 ? (int) v : (int) v - 1;
+        v -= vFloor;
+        v *= v * (3 - 2 * v);
+        //0xE95E1, 0xD4BC7, 0xC1EDB, 0xB0C8B, 0xA1279, 0x92E85
+        xFloor *= 0xE95E1;
+        yFloor *= 0xD4BC7;
+        zFloor *= 0xC1EDB;
+        wFloor *= 0xB0C8B;
+        uFloor *= 0xA127B;
+        vFloor *= 0x92E85;
+        return ((1 - v) *
+            ((1 - u) *
+                ((1 - w) *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor, uFloor, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor, uFloor, vFloor, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor, uFloor, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor, vFloor, seed))))
+                    + (w *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0xB0C8B, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor + 0xB0C8B, uFloor, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor, vFloor, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor, seed)))
+                    )))
+                + (u *
+                ((1 - w) *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor, uFloor + 0xA127B, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor, uFloor + 0xA127B, vFloor, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor, seed))))
+                    + (w *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed)))
+                    )))))
+            + (v *
+            ((1 - u) *
+                ((1 - w) *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor, uFloor, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor, uFloor, vFloor + 0x92E85, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor, uFloor, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor, vFloor + 0x92E85, seed))))
+                    + (w *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed)))
+                    )))
+                + (u *
+                ((1 - w) *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed))))
+                    + (w *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed)))
+                    ))))))
+        ) * 0x1p-9f;
+    }
+
+    public static float valueNoiseWide(int seed, float x, float y, float z, float w, float u, float v) {
+        int xFloor = x >= 0 ? (int) x : (int) x - 1;
+        x -= xFloor;
+        x *= x * (3 - 2 * x);
+        int yFloor = y >= 0 ? (int) y : (int) y - 1;
+        y -= yFloor;
+        y *= y * (3 - 2 * y);
+        int zFloor = z >= 0 ? (int) z : (int) z - 1;
+        z -= zFloor;
+        z *= z * (3 - 2 * z);
+        int wFloor = w >= 0 ? (int) w : (int) w - 1;
+        w -= wFloor;
+        w *= w * (3 - 2 * w);
+        int uFloor = u >= 0 ? (int) u : (int) u - 1;
+        u -= uFloor;
+        u *= u * (3 - 2 * u);
+        int vFloor = v >= 0 ? (int) v : (int) v - 1;
+        v -= vFloor;
+        v *= v * (3 - 2 * v);
+        //0xE95E1, 0xD4BC7, 0xC1EDB, 0xB0C8B, 0xA1279, 0x92E85
+        xFloor *= 0xE95E1;
+        yFloor *= 0xD4BC7;
+        zFloor *= 0xC1EDB;
+        wFloor *= 0xB0C8B;
+        uFloor *= 0xA127B;
+        vFloor *= 0x92E85;
+        return ((1 - v) *
+            ((1 - u) *
+                ((1 - w) *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor, uFloor, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor, uFloor, vFloor, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor, uFloor, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor, vFloor, seed))))
+                    + (w *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0xB0C8B, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor + 0xB0C8B, uFloor, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor, vFloor, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor, seed)))
+                    )))
+                + (u *
+                ((1 - w) *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor, uFloor + 0xA127B, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor, uFloor + 0xA127B, vFloor, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor, seed))))
+                    + (w *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor, seed)))
+                    )))))
+            + (v *
+            ((1 - u) *
+                ((1 - w) *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor, uFloor, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor, uFloor, vFloor + 0x92E85, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor, uFloor, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor, vFloor + 0x92E85, seed))))
+                    + (w *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor, vFloor + 0x92E85, seed)))
+                    )))
+                + (u *
+                ((1 - w) *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor, uFloor + 0xA127B, vFloor + 0x92E85, seed))))
+                    + (w *
+                    ((1 - z) *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed)))
+                        + z *
+                        ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed))
+                            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed)))
+                    ))))))
+        ) * 0x1p-10f + 0.5f;
+
+    }
 
     // Gradient Noise
     public float getPerlinFractal(float x, float y, float z) {
