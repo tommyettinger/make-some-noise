@@ -1941,6 +1941,17 @@ public class Noise implements Serializable {
             default:
                 return singleWideValueFractalFBM(x, y);
             }
+        case FOAM:
+            return singleFoam(seed, x, y);
+        case FOAM_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleFoamFractalBillow(x, y);
+            case RIDGED_MULTI:
+                return singleFoamFractalRidgedMulti(x, y);
+            default:
+                return singleFoamFractalFBM(x, y);
+            }
         case PERLIN:
             return singlePerlin(seed, x, y);
         case PERLIN_FRACTAL:
@@ -3510,9 +3521,113 @@ public class Noise implements Serializable {
                             + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed) + x * hashPart1024(xFloor + 0xE95E1, yFloor + 0xD4BC7, zFloor + 0xC1EDB, wFloor + 0xB0C8B, uFloor + 0xA127B, vFloor + 0x92E85, seed)))
                     ))))))
         ) * 0x1p-10f + 0.5f;
-
     }
 
+    public float getFoamFractal(float x, float y) {
+        x *= frequency;
+        y *= frequency;
+
+        switch (fractalType) {
+        case FBM:
+            return singleFoamFractalFBM(x, y);
+        case BILLOW:
+            return singleFoamFractalBillow(x, y);
+        case RIDGED_MULTI:
+            return singleFoamFractalRidgedMulti(x, y);
+        default:
+            return 0;
+        }
+    }
+    
+    private float singleFoamFractalFBM(float x, float y) {
+        int seed = this.seed;
+        float sum = singleFoam(seed, x, y);
+        float amp = 1, t;
+
+        for (int i = 1; i < octaves; i++) {
+            t = x;
+            x = y * lacunarity;
+            y = t * lacunarity;
+
+            amp *= gain;
+            sum += singleFoam(seed + i, x, y) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleFoamFractalBillow(float x, float y) {
+        int seed = this.seed;
+        float sum = Math.abs(singleFoam(seed, x, y)) * 2 - 1;
+        float amp = 1, t;
+
+        for (int i = 1; i < octaves; i++) {
+            t = x;
+            x = y * lacunarity;
+            y = t * lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleFoam(++seed, x, y)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleFoamFractalRidgedMulti(float x, float y) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike, t;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleFoam(seed + i, x, y));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            t = x;
+            x = y * lacunarity;
+            y = t * lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
+
+    public float getFoam(float x, float y) {
+        return singleFoam(seed, x * frequency, y * frequency);
+    }
+
+
+    // Foam Noise
+    public float singleFoam(int seed, float x, float y) {
+        final float p0 = x;
+        final float p1 = x * -0.5f + y * 0.8660254037844386f;
+        final float p2 = x * -0.5f + y * -0.8660254037844387f;
+
+        float xin = p1;
+        float yin = p2;
+        //double xin = x * 0.540302 + y * 0.841471; // sin and cos of 1
+        //double yin = x * -0.841471 + y * 0.540302;
+        final float a = valueNoiseWide(seed, xin, yin);
+        seed += 0x9E3779BD;
+        seed = (seed ^ seed >>> 12) * 0xDAB;
+        seed ^= seed >>> 14;
+        xin = p2;
+        yin = p0;
+        //xin = x * -0.989992 + y * 0.141120; // sin and cos of 3
+        //yin = x * -0.141120 + y * -0.989992;
+        final float b = valueNoiseWide(seed, xin + a, yin);
+        seed += 0x9E3779BD;
+        seed = (seed ^ seed >>> 12) * 0xDAB;
+        seed ^= seed >>> 14;
+        xin = p0;
+        yin = p1;
+        //xin = x * 0.283662 + y * -0.958924; // sin and cos of 5
+        //yin = x * 0.958924 + y * 0.283662;
+        final float c = valueNoiseWide(seed, xin + b, yin);
+        final float result = (a + b + c) * F3;
+//        return result * result * (6.0 - 4.0 * result) - 1.0;
+        return (result <= 0.5f)
+            ? (result * result * 4) - 1
+            : 1 - ((result - 1) * (result - 1) * 4);
+    }
+    
     // Gradient Noise
     public float getPerlinFractal(float x, float y, float z) {
         x *= frequency;

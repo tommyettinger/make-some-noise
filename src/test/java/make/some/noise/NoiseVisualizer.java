@@ -56,10 +56,10 @@ public class NoiseVisualizer extends ApplicationAdapter {
             public boolean keyDown(int keycode) {
                 switch (keycode) {
                     case MINUS:
-//                        if(dim <= 2)
+                        if(dim <= 0)
+                            noise.setNoiseType((noise.getNoiseType() + 13) % 14);
+                        else
                             noise.setNoiseType((noise.getNoiseType() + 11) % 12);
-//                        else
-//                            noise.setNoiseType((noise.getNoiseType() + 11) % 12);
                         red.setNoiseType(noise.getNoiseType());
                         green.setNoiseType(noise.getNoiseType());
                         blue.setNoiseType(noise.getNoiseType());
@@ -68,10 +68,10 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     case EQUALS:
                     case PLUS:
                     case N: // noise type
-//                        if(dim <= 2) 
+                        if(dim <= 0) 
+                            noise.setNoiseType((noise.getNoiseType() + 1) % 14);
+                        else
                             noise.setNoiseType((noise.getNoiseType() + 1) % 12);
-//                        else
-//                            noise.setNoiseType((noise.getNoiseType() + 1) % 12);
                         red.setNoiseType(noise.getNoiseType());
                         green.setNoiseType(noise.getNoiseType());
                         blue.setNoiseType(noise.getNoiseType());
