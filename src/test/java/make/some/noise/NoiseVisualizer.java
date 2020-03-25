@@ -59,7 +59,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
             public boolean keyDown(int keycode) {
                 switch (keycode) {
                     case MINUS:
-                        if(dim <= 2)
+                        if(dim <= 3)
                             noise.setNoiseType((noise.getNoiseType() + 11) % 12);
                         else
                             noise.setNoiseType((noise.getNoiseType() + 9) % 10);
@@ -71,7 +71,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     case EQUALS:
                     case PLUS:
                     case N: // noise type
-                        if(dim <= 2) 
+                        if(dim <= 3) 
                             noise.setNoiseType((noise.getNoiseType() + 1) % 12);
                         else
                             noise.setNoiseType((noise.getNoiseType() + 1) % 10);
@@ -105,13 +105,13 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         putMap();
                         break;
                     case D: //dimension
-                        if(dim >= 2 && noise.getNoiseType() >= 10)
-                        {
-                            noise.setNoiseType(0);
-                            red.setNoiseType(0);
-                            green.setNoiseType(0);
-                            blue.setNoiseType(0);
-                        }
+//                        if(dim >= 2 && noise.getNoiseType() >= 10)
+//                        {
+//                            noise.setNoiseType(0);
+//                            red.setNoiseType(0);
+//                            green.setNoiseType(0);
+//                            blue.setNoiseType(0);
+//                        }
                         dim = (dim + 1) & 3;
                         putMap();
                         break;
@@ -195,7 +195,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 //        blue.setFrequency(noise.getFrequency());
 
         renderer.begin(view.getCamera().combined, GL_POINTS);
-        final float c = (TimeUtils.timeSinceMillis(startTime) >>> 4 & 0xFFFFFL) * speed + ctr;
+        float c = (TimeUtils.timeSinceMillis(startTime) >>> 4 & 0xFFFFFL) * speed + ctr;
         if(color)
         {
             switch (dim) {
@@ -324,14 +324,12 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     }
                     break;
                 case 3:
-                    float xx, yy;
+                    c *= 0x1p-3f;
                     for (int x = 0; x < width; x++) {
-                        xx = x * 0x1p-4f;
                         for (int y = 0; y < height; y++) {
-                            yy = y * 0x1p-4f;
                             bright = basicPrepare(noise.getConfiguredNoise(
-                                    c + xx, x + c, y - c,
-                                    c - yy, x +  yy, y - xx));
+                                    x + c, c - x, y + c,
+                                    y - c, x + y, x - y));
                             renderer.color(bright, bright, bright, 1f);
                             renderer.vertex(x, y, 0);
                         }

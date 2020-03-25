@@ -1909,6 +1909,7 @@ public class Noise implements Serializable {
      * After being configured with the setters in this class, such as {@link #setNoiseType(int)},
      * {@link #setFrequency(float)}, {@link #setFractalOctaves(int)}, and {@link #setFractalType(int)}, among others,
      * you can call this method to get the particular variety of noise you specified, in 2D.
+     *
      * @param x
      * @param y
      * @return noise as a float from -1f to 1f
@@ -2009,11 +2010,11 @@ public class Noise implements Serializable {
         }
     }
 
-
     /**
      * After being configured with the setters in this class, such as {@link #setNoiseType(int)},
      * {@link #setFrequency(float)}, {@link #setFractalOctaves(int)}, and {@link #setFractalType(int)}, among others,
      * you can call this method to get the particular variety of noise you specified, in 3D.
+     *
      * @param x
      * @param y
      * @param z
@@ -2109,6 +2110,7 @@ public class Noise implements Serializable {
      * After being configured with the setters in this class, such as {@link #setNoiseType(int)},
      * {@link #setFrequency(float)}, {@link #setFractalOctaves(int)}, and {@link #setFractalType(int)}, among others,
      * you can call this method to get the particular variety of noise you specified, in 3D.
+     *
      * @param x
      * @param y
      * @param z
@@ -2184,6 +2186,7 @@ public class Noise implements Serializable {
      * After being configured with the setters in this class, such as {@link #setNoiseType(int)},
      * {@link #setFrequency(float)}, {@link #setFractalOctaves(int)}, and {@link #setFractalType(int)}, among others,
      * you can call this method to get the particular variety of noise you specified, in 3D.
+     *
      * @param x
      * @param y
      * @param z
@@ -2192,7 +2195,7 @@ public class Noise implements Serializable {
      * @param v
      * @return noise as a float from -1f to 1f
      */
-    public float getConfiguredNoise(float x, float y, float z, float w, float u, float v) {
+    public float getConfiguredNoise (float x, float y, float z, float w, float u, float v) {
         x *= frequency;
         y *= frequency;
         z *= frequency;
@@ -2212,30 +2215,41 @@ public class Noise implements Serializable {
             default:
                 return singleValueFractalFBM(x, y, z, w, u, v);
             }
-            case WHITE_NOISE:
-                return getWhiteNoise(x, y, z, w, u, v);
-            case PERLIN:
-                return singlePerlin(seed, x, y, z, w, u, v);
-            case PERLIN_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singlePerlinFractalBillow(x, y, z, w, u, v);
-                    case RIDGED_MULTI:
-                        return singlePerlinFractalRidgedMulti(x, y, z, w, u, v);
-                    default:
-                        return singlePerlinFractalFBM(x, y, z, w, u, v);
-                }
-            case SIMPLEX_FRACTAL:
-                switch (fractalType) {
-                    case BILLOW:
-                        return singleSimplexFractalBillow(x, y, z, w, u, v);
-                    case RIDGED_MULTI:
-                        return singleSimplexFractalRidgedMulti(x, y, z, w, u, v);
-                    default:
-                        return singleSimplexFractalFBM(x, y, z, w, u, v);
-                }
+        case FOAM:
+            return singleFoam(seed, x, y, z, w, u, v);
+        case FOAM_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleFoamFractalBillow(x, y, z, w, u, v);
+            case RIDGED_MULTI:
+                return singleFoamFractalRidgedMulti(x, y, z, w, u, v);
             default:
-                return singleSimplex(seed, x, y, z, w, u, v);
+                return singleFoamFractalFBM(x, y, z, w, u, v);
+            }
+        case PERLIN:
+            return singlePerlin(seed, x, y, z, w, u, v);
+        case PERLIN_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singlePerlinFractalBillow(x, y, z, w, u, v);
+            case RIDGED_MULTI:
+                return singlePerlinFractalRidgedMulti(x, y, z, w, u, v);
+            default:
+                return singlePerlinFractalFBM(x, y, z, w, u, v);
+            }
+        case SIMPLEX_FRACTAL:
+            switch (fractalType) {
+            case BILLOW:
+                return singleSimplexFractalBillow(x, y, z, w, u, v);
+            case RIDGED_MULTI:
+                return singleSimplexFractalRidgedMulti(x, y, z, w, u, v);
+            default:
+                return singleSimplexFractalFBM(x, y, z, w, u, v);
+            }
+        case WHITE_NOISE:
+            return getWhiteNoise(x, y, z, w, u, v);
+        default:
+            return singleSimplex(seed, x, y, z, w, u, v);
         }
     }
 
@@ -3052,7 +3066,7 @@ public class Noise implements Serializable {
         //double yin = x * -0.841471 + y * 0.540302;
         final float a = valueNoise(seed, xin, yin);
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p1;
         yin = p2;
@@ -3060,7 +3074,7 @@ public class Noise implements Serializable {
         //yin = x * -0.141120 + y * -0.989992;
         final float b = valueNoise(seed, xin + a, yin);
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
@@ -3155,21 +3169,21 @@ public class Noise implements Serializable {
         float zin = p0;
         final float a = valueNoise(seed, xin, yin, zin);
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
         zin = p3;
         final float b = valueNoise(seed, xin + a, yin, zin);
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p1;
         yin = p2;
         zin = p3;
         final float c = valueNoise(seed, xin + b, yin, zin);
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
@@ -3259,7 +3273,7 @@ public class Noise implements Serializable {
         final float a = valueNoise(seed, xin, yin, zin, win);
         //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p2;
@@ -3268,7 +3282,7 @@ public class Noise implements Serializable {
         final float b = valueNoise(seed, xin + a, yin, zin, win);
         //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
@@ -3277,7 +3291,7 @@ public class Noise implements Serializable {
         final float c = valueNoise(seed, xin + b, yin, zin, win);
         //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
@@ -3285,7 +3299,7 @@ public class Noise implements Serializable {
         win = p4;
         final float d = valueNoise(seed, xin + c, yin, zin, win);
         seed += 0x9E3779BD;
-        seed = (seed ^ seed >>> 12) * 0xDAB;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
@@ -3305,7 +3319,284 @@ public class Noise implements Serializable {
             return 1 - result * result;
         }
     }
-    // Gradient Noise
+    public float getFoamFractal(float x, float y, float z, float w, float u, float v) {
+        x *= frequency;
+        y *= frequency;
+        z *= frequency;
+        w *= frequency;
+        u *= frequency;
+        v *= frequency;
+
+        switch (fractalType) {
+        case FBM:
+            return singleFoamFractalFBM(x, y, z, w, u, v);
+        case BILLOW:
+            return singleFoamFractalBillow(x, y, z, w, u, v);
+        case RIDGED_MULTI:
+            return singleFoamFractalRidgedMulti(x, y, z, w, u, v);
+        default:
+            return 0;
+        }
+    }
+
+    private float singleFoamFractalFBM(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = singleFoam(seed, x, y, z, w, u, v);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += singleFoam(++seed, x, y, z, w, u, v) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleFoamFractalBillow(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = Math.abs(singleFoam(seed, x, y, z, w, u, v)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singleFoam(++seed, x, y, z, w, u, v)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singleFoamFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singleFoam(seed + i, x, y, z, w, u, v));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
+
+    public float getFoam(float x, float y, float z, float w, float u, float v) {
+        return singleFoam(seed, x * frequency, y * frequency, z * frequency, w * frequency, u * frequency, v * frequency);
+    }
+
+    public float singleFoam(int seed, float x, float y, float z, float w, float u, float v) {
+        final float p0 = x;
+        final float p1 = x * -0.16666666666666666f + y *  0.98601329718326940f;
+        final float p2 = x * -0.16666666666666666f + y * -0.19720265943665383f + z *  0.96609178307929590f;
+        final float p3 = x * -0.16666666666666666f + y * -0.19720265943665383f + z * -0.24152294576982394f + w *  0.93541434669348530f;
+        final float p4 = x * -0.16666666666666666f + y * -0.19720265943665383f + z * -0.24152294576982394f + w * -0.31180478223116176f + u *  0.8819171036881969f;
+        final float p5 = x * -0.16666666666666666f + y * -0.19720265943665383f + z * -0.24152294576982394f + w * -0.31180478223116176f + u * -0.4409585518440984f + v *  0.7637626158259734f;
+        final float p6 = x * -0.16666666666666666f + y * -0.19720265943665383f + z * -0.24152294576982394f + w * -0.31180478223116176f + u * -0.4409585518440984f + v * -0.7637626158259732f;
+        float xin = p0;
+        float yin = p5;
+        float zin = p3;
+        float win = p6;
+        float uin = p1;
+        float vin = p4;
+        final float a = valueNoise(seed, xin, yin, zin, win, uin, vin);
+        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
+        seed += 0x9E3779BD;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
+        seed ^= seed >>> 14;
+        xin = p2;
+        yin = p6;
+        zin = p0;
+        win = p4;
+        uin = p5;
+        vin = p3;
+        final float b = valueNoise(seed, xin + a, yin, zin, win, uin, vin);
+        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
+        seed += 0x9E3779BD;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
+        seed ^= seed >>> 14;
+        xin = p1;
+        yin = p2;
+        zin = p3;
+        win = p4;
+        uin = p6;
+        vin = p5;
+        final float c = valueNoise(seed, xin + b, yin, zin, win, uin, vin);
+        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
+        seed += 0x9E3779BD;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
+        seed ^= seed >>> 14;
+        xin = p6;
+        yin = p0;
+        zin = p2;
+        win = p5;
+        uin = p4;
+        vin = p1;
+        final float d = valueNoise(seed, xin + c, yin, zin, win, uin, vin);
+        seed += 0x9E3779BD;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
+        seed ^= seed >>> 14;
+        xin = p2;
+        yin = p1;
+        zin = p5;
+        win = p0;
+        uin = p3;
+        vin = p6;
+        final float e = valueNoise(seed, xin + d, yin, zin, win, uin, vin);
+        seed += 0x9E3779BD;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
+        seed ^= seed >>> 14;
+        xin = p0;
+        yin = p4;
+        zin = p6;
+        win = p3;
+        uin = p1;
+        vin = p2;
+        final float f = valueNoise(seed, xin + e, yin, zin, win, uin, vin);
+        seed += 0x9E3779BD;
+        //seed = (seed ^ seed >>> 12) * 0xDAB;
+        seed ^= seed >>> 14;
+        xin = p5;
+        yin = p1;
+        zin = p2;
+        win = p3;
+        uin = p4;
+        vin = p0;
+        final float g = valueNoise(seed, xin + f, yin, zin, win, uin, vin);
+        float result = (a + b + c + d + e + f + g) * 0.14285714285714285f;
+        if (result <= 0.5f){
+            result *= 2;
+            result *= result * result;
+            return result * result - 1;
+        }
+        else{
+            result = (result - 1) * 2;
+            result *= result * result;
+            return 1 - result * result;
+        }
+    }
+    /// double no more!
+    
+    // (Classic) Perlin Noise, AKA Gradient Noise
+    
+    public float getPerlinFractal(float x, float y) {
+        x *= frequency;
+        y *= frequency;
+
+        switch (fractalType) {
+        case FBM:
+            return singlePerlinFractalFBM(x, y);
+        case BILLOW:
+            return singlePerlinFractalBillow(x, y);
+        case RIDGED_MULTI:
+            return singlePerlinFractalRidgedMulti(x, y);
+        default:
+            return 0;
+        }
+    }
+
+    private float singlePerlinFractalFBM(float x, float y) {
+        int seed = this.seed;
+        float sum = singlePerlin(seed, x, y);
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+
+            amp *= gain;
+            sum += singlePerlin(++seed, x, y) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singlePerlinFractalBillow(float x, float y) {
+        int seed = this.seed;
+        float sum = Math.abs(singlePerlin(seed, x, y)) * 2 - 1;
+        float amp = 1;
+
+        for (int i = 1; i < octaves; i++) {
+            x *= lacunarity;
+            y *= lacunarity;
+
+            amp *= gain;
+            sum += (Math.abs(singlePerlin(++seed, x, y)) * 2 - 1) * amp;
+        }
+
+        return sum * fractalBounding;
+    }
+
+    private float singlePerlinFractalRidgedMulti(float x, float y) {
+        int seed = this.seed;
+        float sum = 0, amp = 1, ampBias = 1f, spike;
+        for (int i = 0; i < octaves; i++) {
+            spike = 1f - Math.abs(singlePerlin(seed + i, x, y));
+            spike *= spike * amp;
+            amp = Math.max(0f, Math.min(1f, spike * 2f));
+            sum += (spike * ampBias);
+            ampBias *= 2f;
+            x *= lacunarity;
+            y *= lacunarity;
+        }
+        return sum / ((ampBias - 1f) * 0.5f) - 1f;
+    }
+
+    public float getPerlin(float x, float y) {
+        return singlePerlin(seed, x * frequency, y * frequency);
+    }
+
+    private float singlePerlin(int seed, float x, float y) {
+        int x0 = fastFloor(x);
+        int y0 = fastFloor(y);
+        int x1 = x0 + 1;
+        int y1 = y0 + 1;
+
+        float xs, ys;
+        switch (interpolation) {
+        default:
+        case LINEAR:
+            xs = x - x0;
+            ys = y - y0;
+            break;
+        case HERMITE:
+            xs = hermiteInterpolator(x - x0);
+            ys = hermiteInterpolator(y - y0);
+            break;
+        case QUINTIC:
+            xs = quinticInterpolator(x - x0);
+            ys = quinticInterpolator(y - y0);
+            break;
+        }
+
+        float xd0 = x - x0;
+        float yd0 = y - y0;
+        float xd1 = xd0 - 1;
+        float yd1 = yd0 - 1;
+
+        float xf0 = lerp(gradCoord2D(seed, x0, y0, xd0, yd0), gradCoord2D(seed, x1, y0, xd1, yd0), xs);
+        float xf1 = lerp(gradCoord2D(seed, x0, y1, xd0, yd1), gradCoord2D(seed, x1, y1, xd1, yd1), xs);
+
+        return lerp(xf0, xf1, ys);
+    }
+    
     public float getPerlinFractal(float x, float y, float z) {
         x *= frequency;
         y *= frequency;
@@ -3559,106 +3850,85 @@ public class Noise implements Serializable {
         return lerp(zf0, zf1, ws) * 0.625f;
     }
 
-    public float getPerlinFractal(float x, float y) {
+    public float getPerlinFractal(float x, float y, float z, float w, float u, float v) {
         x *= frequency;
         y *= frequency;
+        z *= frequency;
+        w *= frequency;
+        u *= frequency;
+        v *= frequency;
 
         switch (fractalType) {
-            case FBM:
-                return singlePerlinFractalFBM(x, y);
-            case BILLOW:
-                return singlePerlinFractalBillow(x, y);
-            case RIDGED_MULTI:
-                return singlePerlinFractalRidgedMulti(x, y);
-            default:
-                return 0;
+        case FBM:
+            return singlePerlinFractalFBM(x, y, z, w, u, v);
+        case BILLOW:
+            return singlePerlinFractalBillow(x, y, z, w, u, v);
+        case RIDGED_MULTI:
+            return singlePerlinFractalRidgedMulti(x, y, z, w, u, v);
+        default:
+            return 0;
         }
     }
-
-    private float singlePerlinFractalFBM(float x, float y) {
+    
+    private float singlePerlinFractalFBM(float x, float y, float z, float w, float u, float v) {
         int seed = this.seed;
-        float sum = singlePerlin(seed, x, y);
+        float sum = singlePerlin(seed, x, y, z, w, u, v);
         float amp = 1;
 
         for (int i = 1; i < octaves; i++) {
             x *= lacunarity;
             y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
 
             amp *= gain;
-            sum += singlePerlin(++seed, x, y) * amp;
+            sum += singlePerlin(++seed, x, y, z, w, u, v) * amp;
         }
 
         return sum * fractalBounding;
     }
 
-    private float singlePerlinFractalBillow(float x, float y) {
+    private float singlePerlinFractalBillow(float x, float y, float z, float w, float u, float v) {
         int seed = this.seed;
-        float sum = Math.abs(singlePerlin(seed, x, y)) * 2 - 1;
+        float sum = Math.abs(singlePerlin(seed, x, y, z, w, u, v)) * 2 - 1;
         float amp = 1;
 
         for (int i = 1; i < octaves; i++) {
             x *= lacunarity;
             y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
 
             amp *= gain;
-            sum += (Math.abs(singlePerlin(++seed, x, y)) * 2 - 1) * amp;
+            sum += (Math.abs(singlePerlin(++seed, x, y, z, w, u, v)) * 2 - 1) * amp;
         }
 
         return sum * fractalBounding;
     }
 
-    private float singlePerlinFractalRidgedMulti(float x, float y) {
+    private float singlePerlinFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
         int seed = this.seed;
         float sum = 0, amp = 1, ampBias = 1f, spike;
         for (int i = 0; i < octaves; i++) {
-            spike = 1f - Math.abs(singlePerlin(seed + i, x, y));
+            spike = 1f - Math.abs(singlePerlin(seed + i, x, y, z, w, u, v));
             spike *= spike * amp;
             amp = Math.max(0f, Math.min(1f, spike * 2f));
             sum += (spike * ampBias);
             ampBias *= 2f;
             x *= lacunarity;
             y *= lacunarity;
+            z *= lacunarity;
+            w *= lacunarity;
+            u *= lacunarity;
+            v *= lacunarity;
         }
         return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
-    public float getPerlin(float x, float y) {
-        return singlePerlin(seed, x * frequency, y * frequency);
-    }
-
-    private float singlePerlin(int seed, float x, float y) {
-        int x0 = fastFloor(x);
-        int y0 = fastFloor(y);
-        int x1 = x0 + 1;
-        int y1 = y0 + 1;
-
-        float xs, ys;
-        switch (interpolation) {
-            default:
-            case LINEAR:
-                xs = x - x0;
-                ys = y - y0;
-                break;
-            case HERMITE:
-                xs = hermiteInterpolator(x - x0);
-                ys = hermiteInterpolator(y - y0);
-                break;
-            case QUINTIC:
-                xs = quinticInterpolator(x - x0);
-                ys = quinticInterpolator(y - y0);
-                break;
-        }
-
-        float xd0 = x - x0;
-        float yd0 = y - y0;
-        float xd1 = xd0 - 1;
-        float yd1 = yd0 - 1;
-
-        float xf0 = lerp(gradCoord2D(seed, x0, y0, xd0, yd0), gradCoord2D(seed, x1, y0, xd1, yd0), xs);
-        float xf1 = lerp(gradCoord2D(seed, x0, y1, xd0, yd1), gradCoord2D(seed, x1, y1, xd1, yd1), xs);
-
-        return lerp(xf0, xf1, ys);
-    }
     public float getPerlin(float x, float y, float z, float w, float u, float v) {
         return singlePerlin(seed, x * frequency, y * frequency, z * frequency, w * frequency, u * frequency, v * frequency);
     }
@@ -3796,64 +4066,6 @@ public class Noise implements Serializable {
         final float uf1 = lerp(wf01, wf11, us);
 
         return lerp(uf0, uf1, vs);
-    }
-    private float singlePerlinFractalFBM(float x, float y, float z, float w, float u, float v) {
-        int seed = this.seed;
-        float sum = singlePerlin(seed, x, y, z, w, u, v);
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-            u *= lacunarity;
-            v *= lacunarity;
-
-            amp *= gain;
-            sum += singlePerlin(++seed, x, y, z, w, u, v) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singlePerlinFractalBillow(float x, float y, float z, float w, float u, float v) {
-        int seed = this.seed;
-        float sum = Math.abs(singlePerlin(seed, x, y, z, w, u, v)) * 2 - 1;
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-            u *= lacunarity;
-            v *= lacunarity;
-
-            amp *= gain;
-            sum += (Math.abs(singlePerlin(++seed, x, y, z, w, u, v)) * 2 - 1) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singlePerlinFractalRidgedMulti(float x, float y, float z, float w, float u, float v) {
-        int seed = this.seed;
-        float sum = 0, amp = 1, ampBias = 1f, spike;
-        for (int i = 0; i < octaves; i++) {
-            spike = 1f - Math.abs(singlePerlin(seed + i, x, y, z, w, u, v));
-            spike *= spike * amp;
-            amp = Math.max(0f, Math.min(1f, spike * 2f));
-            sum += (spike * ampBias);
-            ampBias *= 2f;
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-            w *= lacunarity;
-            u *= lacunarity;
-            v *= lacunarity;
-        }
-        return sum / ((ampBias - 1f) * 0.5f) - 1f;
     }
 
     public float getSimplexFractal(float x, float y) {
