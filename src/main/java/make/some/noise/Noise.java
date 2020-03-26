@@ -1602,7 +1602,7 @@ public class Noise implements Serializable {
     /**
      * Changes the interpolation method used to smooth between noise values, using on of the following constants from
      * this class (lowest to highest quality): {@link #LINEAR} (0), {@link #HERMITE} (1), or {@link #QUINTIC} (2). If
-     * this is not called, it defaults to HERMITE. This is used in Perlin Noise and Position Perturbing.
+     * this is not called, it defaults to HERMITE. This is used in Value Noise, Perlin Noise, and Position Perturbing.
      * @param interpolation an int (0, 1, or 2) corresponding  to a constant from this class for an interpolation level
      */
     public void setInterpolation(int interpolation) {
@@ -2413,13 +2413,21 @@ public class Noise implements Serializable {
     }
 
 
-    public static float singleValue (int seed, float x, float y) {
+    public float singleValue (int seed, float x, float y) {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
-        x *= x * (3 - 2 * x);
         int yFloor = y >= 0 ? (int) y : (int) y - 1;
         y -= yFloor;
-        y *= y * (3 - 2 * y);
+        switch (interpolation) {
+        case HERMITE:
+            x = hermiteInterpolator(x);
+            y = hermiteInterpolator(y);
+            break;
+        case QUINTIC:
+            x = quinticInterpolator(x);
+            y = quinticInterpolator(y);
+            break;
+        }
         xFloor *= 0xD1B55;
         yFloor *= 0xABC99;
         return ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor, seed))
@@ -2519,13 +2527,22 @@ public class Noise implements Serializable {
     private float singleValue(int seed, float x, float y, float z) {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
-        x *= x * (3 - 2 * x);
         int yFloor = y >= 0 ? (int) y : (int) y - 1;
         y -= yFloor;
-        y *= y * (3 - 2 * y);
         int zFloor = z >= 0 ? (int) z : (int) z - 1;
         z -= zFloor;
-        z *= z * (3 - 2 * z);
+        switch (interpolation) { 
+        case HERMITE:
+            x = hermiteInterpolator(x);
+            y = hermiteInterpolator(y);
+            z = hermiteInterpolator(z);
+            break;
+        case QUINTIC:
+            x = quinticInterpolator(x);
+            y = quinticInterpolator(y);
+            z = quinticInterpolator(z);
+            break;
+        }
         //0xDB4F1, 0xBBE05, 0xA0F2F
         xFloor *= 0xDB4F1;
         yFloor *= 0xBBE05;
@@ -2646,16 +2663,26 @@ public class Noise implements Serializable {
     private float singleValue(int seed, float x, float y, float z, float w) {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
-        x *= x * (3 - 2 * x);
         int yFloor = y >= 0 ? (int) y : (int) y - 1;
         y -= yFloor;
-        y *= y * (3 - 2 * y);
         int zFloor = z >= 0 ? (int) z : (int) z - 1;
         z -= zFloor;
-        z *= z * (3 - 2 * z);
         int wFloor = w >= 0 ? (int) w : (int) w - 1;
         w -= wFloor;
-        w *= w * (3 - 2 * w);
+        switch (interpolation) {
+        case HERMITE:
+            x = hermiteInterpolator(x);
+            y = hermiteInterpolator(y);
+            z = hermiteInterpolator(z);
+            w = hermiteInterpolator(w);
+            break;
+        case QUINTIC:
+            x = quinticInterpolator(x);
+            y = quinticInterpolator(y);
+            z = quinticInterpolator(z);
+            w = quinticInterpolator(w);
+            break;
+        }
         //0xE19B1, 0xC6D1D, 0xAF36D, 0x9A695
         xFloor *= 0xE19B1;
         yFloor *= 0xC6D1D;
@@ -2796,22 +2823,34 @@ public class Noise implements Serializable {
     private float singleValue(int seed, float x, float y, float z, float w, float u, float v) {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
-        x *= x * (3 - 2 * x);
         int yFloor = y >= 0 ? (int) y : (int) y - 1;
         y -= yFloor;
-        y *= y * (3 - 2 * y);
         int zFloor = z >= 0 ? (int) z : (int) z - 1;
         z -= zFloor;
-        z *= z * (3 - 2 * z);
         int wFloor = w >= 0 ? (int) w : (int) w - 1;
         w -= wFloor;
-        w *= w * (3 - 2 * w);
         int uFloor = u >= 0 ? (int) u : (int) u - 1;
         u -= uFloor;
-        u *= u * (3 - 2 * u);
         int vFloor = v >= 0 ? (int) v : (int) v - 1;
         v -= vFloor;
-        v *= v * (3 - 2 * v);
+        switch (interpolation) {
+        case HERMITE:
+            x = hermiteInterpolator(x);
+            y = hermiteInterpolator(y);
+            z = hermiteInterpolator(z);
+            w = hermiteInterpolator(w);
+            u = hermiteInterpolator(u);
+            v = hermiteInterpolator(v);
+            break;
+        case QUINTIC:
+            x = quinticInterpolator(x);
+            y = quinticInterpolator(y);
+            z = quinticInterpolator(z);
+            w = quinticInterpolator(w);
+            u = quinticInterpolator(u);
+            v = quinticInterpolator(v);
+            break;
+        }
         //0xE95E1, 0xD4BC7, 0xC1EDB, 0xB0C8B, 0xA1279, 0x92E85
         xFloor *= 0xE95E1;
         yFloor *= 0xD4BC7;

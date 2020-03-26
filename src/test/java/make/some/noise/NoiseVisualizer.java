@@ -53,6 +53,8 @@ public class NoiseVisualizer extends ApplicationAdapter {
         Gdx.gl.glDisable(GL20.GL_BLEND);
         renderer = new ImmediateModeRenderer20(width * height, false, true, 0);
         view = new ScreenViewport();
+        
+        //noise.setInterpolation(Noise.QUINTIC);
 
         input = new InputAdapter(){
             @Override
