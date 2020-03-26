@@ -6,7 +6,7 @@
 
     <groupId>com.github.tommyettinger</groupId>
     <artifactId>make_some_noise</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2</version>
     <modules>
     </modules>
 
@@ -58,7 +58,7 @@
         <maven.gpg.version>1.6</maven.gpg.version>
         <jdk.version>1.7</jdk.version>
         <junit.version>4.11</junit.version>
-        <gdx.version>1.9.9</gdx.version>
+        <gdx.version>1.9.10</gdx.version>
     </properties>
 
 

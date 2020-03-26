@@ -47,9 +47,7 @@ public class Noise implements Serializable {
     private static final long serialVersionUID = 2L;
     public static final int VALUE = 0, VALUE_FRACTAL = 1, PERLIN = 2, PERLIN_FRACTAL = 3,
         SIMPLEX = 4, SIMPLEX_FRACTAL = 5, CELLULAR = 6, WHITE_NOISE = 7, CUBIC = 8, CUBIC_FRACTAL = 9, 
-        FOAM = 10, FOAM_FRACTAL = 11,
-        SUPER_SIMPLEX = 12, SUPER_SIMPLEX_FRACTAL = 13;
-
+        FOAM = 10, FOAM_FRACTAL = 11;
     public static final int LINEAR = 0, HERMITE = 1, QUINTIC = 2;
 
     public static final int FBM = 0, BILLOW = 1, RIDGED_MULTI = 2;
@@ -1983,28 +1981,6 @@ public class Noise implements Serializable {
             default:
                 return singleCubicFractalFBM(x, y);
             }
-        case SUPER_SIMPLEX:
-            return singleSuperSimplex(seed, x, y);
-        case SUPER_SIMPLEX_FRACTAL:
-            switch (fractalType) {
-            case BILLOW:
-                return singleSuperSimplexFractalBillow(x, y);
-            case RIDGED_MULTI:
-                return singleSuperSimplexFractalRidgedMulti(x, y);
-            default:
-                return singleSuperSimplexFractalFBM(x, y);
-            }
-//            case BOREAL:
-//                return singleBoreal(seed, x, y);
-//            case BOREAL_FRACTAL:
-//                switch (fractalType) {
-//                    case BILLOW:
-//                        return singleBorealFractalBillow(x, y);
-//                    case RIDGED_MULTI:
-//                        return singleBorealFractalRidgedMulti(x, y);
-//                    default:
-//                        return singleBorealFractalFBM(x, y);
-//                }
         default:
             return singleSimplex(seed, x, y);
         }
@@ -2089,17 +2065,6 @@ public class Noise implements Serializable {
                 return singleCubicFractalRidgedMulti(x, y, z);
             default:
                 return singleCubicFractalFBM(x, y, z);
-            }
-        case SUPER_SIMPLEX:
-            return singleBoreal(seed, x, y, z);
-        case SUPER_SIMPLEX_FRACTAL:
-            switch (fractalType) {
-            case BILLOW:
-                return singleBorealFractalBillow(x, y, z);
-            case RIDGED_MULTI:
-                return singleBorealFractalRidgedMulti(x, y, z);
-            default:
-                return singleBorealFractalFBM(x, y, z);
             }
         default:
             return singleSimplex(seed, x, y, z);
@@ -2563,7 +2528,7 @@ public class Noise implements Serializable {
      * @param z 
      * @return noise from 0 to 1.
      */
-    public static float valueNoise (int seed, float x, float y, float z)
+    private static float valueNoise (int seed, float x, float y, float z)
     {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
@@ -2704,7 +2669,7 @@ public class Noise implements Serializable {
                     + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor + 0x9A695, seed) + x * hashPart1024(xFloor + 0xE19B1, yFloor + 0xC6D1D, zFloor + 0xAF36D, wFloor + 0x9A695, seed)))
             ))) * 0x1p-9f;
     }
-    public static float valueNoise(int seed, float x, float y, float z, float w)
+    private static float valueNoise(int seed, float x, float y, float z, float w)
     {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
@@ -2927,7 +2892,7 @@ public class Noise implements Serializable {
         ) * 0x1p-9f;
     }
 
-    public static float valueNoise(int seed, float x, float y, float z, float w, float u, float v) {
+    private static float valueNoise(int seed, float x, float y, float z, float w, float u, float v) {
         int xFloor = x >= 0 ? (int) x : (int) x - 1;
         x -= xFloor;
         x *= x * (3 - 2 * x);
@@ -3101,27 +3066,18 @@ public class Noise implements Serializable {
 
         float xin = p2;
         float yin = p0;
-        //double xin = x * 0.540302 + y * 0.841471; // sin and cos of 1
-        //double yin = x * -0.841471 + y * 0.540302;
         final float a = valueNoise(seed, xin, yin);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p1;
         yin = p2;
-        //xin = x * -0.989992 + y * 0.141120; // sin and cos of 3
-        //yin = x * -0.141120 + y * -0.989992;
         final float b = valueNoise(seed, xin + a, yin);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
-        //xin = x * 0.283662 + y * -0.958924; // sin and cos of 5
-        //yin = x * 0.958924 + y * 0.283662;
         final float c = valueNoise(seed, xin + b, yin);
         final float result = (a + b + c) * F3;
-//        return result * result * (6.0 - 4.0 * result) - 1.0;
         return (result <= 0.5f)
             ? (result * result * 4) - 1
             : 1 - ((result - 1) * (result - 1) * 4);
@@ -3208,21 +3164,18 @@ public class Noise implements Serializable {
         float zin = p0;
         final float a = valueNoise(seed, xin, yin, zin);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
         zin = p3;
         final float b = valueNoise(seed, xin + a, yin, zin);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p1;
         yin = p2;
         zin = p3;
         final float c = valueNoise(seed, xin + b, yin, zin);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
@@ -3310,27 +3263,21 @@ public class Noise implements Serializable {
         float zin = p3;
         float win = p4;
         final float a = valueNoise(seed, xin, yin, zin, win);
-        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p2;
         zin = p3;
         win = p4;
         final float b = valueNoise(seed, xin + a, yin, zin, win);
-        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
         zin = p3;
         win = p4;
         final float c = valueNoise(seed, xin + b, yin, zin, win);
-        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
@@ -3338,7 +3285,6 @@ public class Noise implements Serializable {
         win = p4;
         final float d = valueNoise(seed, xin + c, yin, zin, win);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p1;
@@ -3456,9 +3402,7 @@ public class Noise implements Serializable {
         float uin = p1;
         float vin = p4;
         final float a = valueNoise(seed, xin, yin, zin, win, uin, vin);
-        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p2;
         yin = p6;
@@ -3467,9 +3411,7 @@ public class Noise implements Serializable {
         uin = p5;
         vin = p3;
         final float b = valueNoise(seed, xin + a, yin, zin, win, uin, vin);
-        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p1;
         yin = p2;
@@ -3478,9 +3420,7 @@ public class Noise implements Serializable {
         uin = p6;
         vin = p5;
         final float c = valueNoise(seed, xin + b, yin, zin, win, uin, vin);
-        //seed = (seed ^ 0x9E3779BD) * 0xDAB;
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p6;
         yin = p0;
@@ -3490,7 +3430,6 @@ public class Noise implements Serializable {
         vin = p1;
         final float d = valueNoise(seed, xin + c, yin, zin, win, uin, vin);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p2;
         yin = p1;
@@ -3500,7 +3439,6 @@ public class Noise implements Serializable {
         vin = p6;
         final float e = valueNoise(seed, xin + d, yin, zin, win, uin, vin);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p0;
         yin = p4;
@@ -3510,7 +3448,6 @@ public class Noise implements Serializable {
         vin = p2;
         final float f = valueNoise(seed, xin + e, yin, zin, win, uin, vin);
         seed += 0x9E3779BD;
-        //seed = (seed ^ seed >>> 12) * 0xDAB;
         seed ^= seed >>> 14;
         xin = p5;
         yin = p1;
@@ -3531,7 +3468,6 @@ public class Noise implements Serializable {
             return 1 - result * result;
         }
     }
-    /// double no more!
     
     // (Classic) Perlin Noise, AKA Gradient Noise
     
@@ -5823,354 +5759,6 @@ public class Noise implements Serializable {
         v2[1] += lerp(ly0x, ly1x, ys) * perturbAmp;
     }
     
-    // 2D Boreal Noise
-
-    private float singleBorealFractalFBM(float x, float y) {
-        int seed = this.seed;
-        float sum = singleBoreal(seed, x, y);
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-
-            amp *= gain;
-            sum += singleBoreal(seed + i, x, y) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singleBorealFractalBillow(float x, float y) {
-        int seed = this.seed;
-        float sum = Math.abs(singleBoreal(seed, x, y)) * 2 - 1;
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-
-            amp *= gain;
-            sum += (Math.abs(singleBoreal(++seed, x, y)) * 2 - 1) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-    
-    private float singleBorealFractalRidgedMulti(float x, float y) {
-        int seed = this.seed;
-        float sum = 0, amp = 1, ampBias = 1f, spike;
-        for (int i = 0; i < octaves; i++) {
-            spike = 1f - Math.abs(singleBoreal(seed + i, x, y));
-            spike *= spike * amp;
-            amp = Math.max(0f, Math.min(1f, spike * 2f));
-            sum += (spike * ampBias);
-            ampBias *= 2f;
-            x *= lacunarity;
-            y *= lacunarity;
-        }
-        return sum / ((ampBias - 1f) * 0.5f) - 1f;
-    }
-
-    public float getBoreal(float x, float y) {
-        return singleBoreal(seed, x * frequency, y * frequency);
-    }
-
-    public float singleBoreal(int seed, float x, float y) {
-        float c0 = x, c1 = y;
-        float r = (swayRandomized(seed, c0 + c1) + 1.5f);
-//        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1 - r) + cos(c1 + r);
-//        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r) + cos(c0 + r * 1.618f);
-//        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0 + r) + cos(c1 - r * 2f);
-//        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1 + r) + cos(c0 - r * 2.618f);
-
-//        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1 - r) + sway(r + c0);
-//        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r) + sway(r + c1);
-//        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0 + r) - sway(r + c0);
-//        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1 + r) - sway(r + c1);
-
-        c0 += swayRandomized(seed ^ 0xC13FA9A9, c0 - c1 - r) + sway((c1 - r) * 0.1618f);
-        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r) + sway((c0 + r) * 0.2323f);
-        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0 + r) + sway((c1 + r) * 0.2618f);
-        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1 + r) + sway((c0 - r) * 0.3131f);
-        
-//        c0 += swayRandomized(seed, c0 - c1) + swayRandomized(~seed, c1);
-//        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c0 + c1) - swayRandomized(~(seed * 3), c0);
-//        c0 -= swayRandomized(seed ^ 0x9E3779B9, c1 - c0) + swayRandomized(~(seed * 5), c1);
-//        c1 += swayRandomized(seed ^ 0xDB4F0B91, c0 + c1) - swayRandomized(~(seed * 7), c0);
-        return sway(c0 + c1);
-    }
-
-    // 3D Boreal Noise
-    public float getBorealFractal(float x, float y, float z) {
-        x *= frequency;
-        y *= frequency;
-        z *= frequency;
-
-        switch (fractalType) {
-            case FBM:
-                return singleBorealFractalFBM(x, y, z);
-            case BILLOW:
-                return singleBorealFractalBillow(x, y, z);
-            case RIDGED_MULTI:
-                return singleBorealFractalRidgedMulti(x, y, z);
-            default:
-                return 0;
-        }
-    }
-    
-    private float singleBorealFractalFBM(float x, float y, float z) {
-        int seed = this.seed;
-        float sum = singleBoreal(seed, x, y, z);
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-
-            amp *= gain;
-            sum += singleBoreal(seed + i, x, y, z) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singleBorealFractalBillow(float x, float y, float z) {
-        int seed = this.seed;
-        float sum = Math.abs(singleBoreal(seed, x, y, z)) * 2 - 1;
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-
-            amp *= gain;
-            sum += (Math.abs(singleBoreal(seed + i, x, y, z)) * 2 - 1) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-    
-    private float singleBorealFractalRidgedMulti(float x, float y, float z) {
-        int seed = this.seed;
-        float sum = 0, amp = 1, ampBias = 1f, spike;
-        for (int i = 0; i < octaves; i++) {
-            spike = 1f - Math.abs(singleBoreal(seed + i, x, y, z));
-            spike *= spike * amp;
-            amp = Math.max(0f, Math.min(1f, spike * 2f));
-            sum += (spike * ampBias);
-            ampBias *= 2f;
-            x *= lacunarity;
-            y *= lacunarity;
-            z *= lacunarity;
-        }
-        return sum / ((ampBias - 1f) * 0.5f) - 1f;
-    }
-
-    public float getBoreal(float x, float y, float z) {
-        return singleBoreal(seed, x * frequency, y * frequency, z * frequency);
-    }
-
-    public float singleBoreal(int seed, float x, float y, float z) {
-        float c0 = x, c1 = y, c2 = z;
-        final float r = (swayRandomized(seed, c0 + c1 + c2) + 1.5f);
-
-        c0 += swayRandomized(seed, c1 + c0 + r);
-        c1 += swayRandomized(seed ^ 0x7F4A7C15, c2 + c1 + r) + cos(c0 + r);
-        c2 += swayRandomized(seed ^ 0x9E3779B9, c0 + c2 + r);
-
-        c0 -= swayRandomized(seed, c1 + c2 + r);
-        c1 -= swayRandomized(seed ^ 0x7F4A7C15, c2 + c0 + r);
-        c2 -= swayRandomized(seed ^ 0x9E3779B9, c1 + c2 + r) + cos(c1 + r);
-
-        c0 += swayRandomized(seed, c2 + c0 - r) + cos(c2 + r);
-        c1 += swayRandomized(seed ^ 0x7F4A7C15, c0 + c1 - r);
-        c2 += swayRandomized(seed ^ 0x9E3779B9, c1 + c2 - r);
-        
-        return sway(c0 + c1 + c2);
-    }
-
-
-    //SuperSimplex
-
-    private static class LatticePoint2D {
-        int xsv, ysv;
-        float dx, dy;
-        public LatticePoint2D(int xsv, int ysv) {
-            this.xsv = xsv; this.ysv = ysv;
-            float ssv = (xsv + ysv) * -0.21132487f;
-            this.dx = -xsv - ssv;
-            this.dy = -ysv - ssv;
-        }
-    }
-
-    private static final LatticePoint2D[] LOOKUP_2D = new LatticePoint2D[] {
-            new LatticePoint2D(0, 0),
-            new LatticePoint2D(1, 1),
-            new LatticePoint2D(-1, 0),
-            new LatticePoint2D(0, -1),
-            new LatticePoint2D(0, 0),
-            new LatticePoint2D(1, 1),
-            new LatticePoint2D(0, 1),
-            new LatticePoint2D(1, 0),
-            new LatticePoint2D(0, 0),
-            new LatticePoint2D(1, 1),
-            new LatticePoint2D(1, 0),
-            new LatticePoint2D(0, -1),
-            new LatticePoint2D(0, 0),
-            new LatticePoint2D(1, 1),
-            new LatticePoint2D(2, 1),
-            new LatticePoint2D(1, 0),
-            new LatticePoint2D(0, 0),
-            new LatticePoint2D(1, 1),
-            new LatticePoint2D(-1, 0),
-            new LatticePoint2D(0, 1),
-            new LatticePoint2D(0, 0),
-            new LatticePoint2D(1, 1),
-            new LatticePoint2D(0, 1),
-            new LatticePoint2D(1, 2),
-            new LatticePoint2D(0, 0),
-            new LatticePoint2D(1, 1),
-            new LatticePoint2D(1, 0),
-            new LatticePoint2D(0, 1),
-            new LatticePoint2D(0, 0),
-            new LatticePoint2D(1, 1),
-            new LatticePoint2D(2, 1),
-            new LatticePoint2D(1, 2),
-    };
-    	private static final Float2[] GRADIENTS_2D = new Float2[] {
-			new Float2(0.0f, 18.579874f),
-			new Float2(9.289937f, 16.090643f),
-			new Float2(16.090643f, 9.289937f),
-			new Float2(18.579874f, 0.0f),
-			new Float2(16.090643f, -9.289937f),
-			new Float2(9.289937f, -16.090643f),
-			new Float2(0.0f, -18.579874f),
-			new Float2(-9.289937f, -16.090643f),
-			new Float2(-16.090643f, -9.289937f),
-			new Float2(-18.579874f, 0.0f),
-			new Float2(-16.090643f, 9.289937f),
-			new Float2(-9.289937f, 16.090643f),
-
-			new Float2(0.0f, 18.579874f),
-			new Float2(9.289937f, 16.090643f),
-			new Float2(16.090643f, 9.289937f),
-			new Float2(18.579874f, 0.0f),
-			new Float2(16.090643f, -9.289937f),
-			new Float2(9.289937f, -16.090643f),
-			new Float2(0.0f, -18.579874f),
-			new Float2(-9.289937f, -16.090643f),
-			new Float2(-16.090643f, -9.289937f),
-			new Float2(-18.579874f, 0.0f),
-			new Float2(-16.090643f, 9.289937f),
-			new Float2(-9.289937f, 16.090643f),
-
-			new Float2(9.289937f, 16.090643f),
-			new Float2(16.090643f, 9.289937f),
-			new Float2(18.579874f, 0.0f),
-			new Float2(9.289937f, -16.090643f),
-			new Float2(0.0f, -18.579874f),
-			new Float2(-9.289937f, -16.090643f),
-			new Float2(-16.090643f, 9.289937f),
-			new Float2(-9.289937f, 16.090643f),
-	};
-
-
-    private float singleSuperSimplexFractalFBM(float x, float y) {
-        int seed = this.seed;
-        float sum = singleSuperSimplex(seed, x, y);
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-
-            amp *= gain;
-            sum += singleSuperSimplex(seed + i, x, y) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singleSuperSimplexFractalBillow(float x, float y) {
-        int seed = this.seed;
-        float sum = Math.abs(singleSuperSimplex(seed, x, y)) * 2 - 1;
-        float amp = 1;
-
-        for (int i = 1; i < octaves; i++) {
-            x *= lacunarity;
-            y *= lacunarity;
-
-            amp *= gain;
-            sum += (Math.abs(singleSuperSimplex(++seed, x, y)) * 2 - 1) * amp;
-        }
-
-        return sum * fractalBounding;
-    }
-
-    private float singleSuperSimplexFractalRidgedMulti(float x, float y) {
-        int seed = this.seed;
-        float sum = 0, amp = 1, ampBias = 1f, spike;
-        for (int i = 0; i < octaves; i++) {
-            spike = 1f - Math.abs(singleSuperSimplex(seed + i, x, y));
-            spike *= spike * amp;
-            amp = Math.max(0f, Math.min(1f, spike * 2f));
-            sum += (spike * ampBias);
-            ampBias *= 2f;
-            x *= lacunarity;
-            y *= lacunarity;
-        }
-        return sum / ((ampBias - 1f) * 0.5f) - 1f;
-    }
-
-    public float getSuperSimplex(float x, float y) {
-        return singleSuperSimplex(seed, x * frequency, y * frequency);
-    }
-
-
-
-    public float singleSuperSimplex(int seed, float x, float y) {
-        float value = 0;
-
-        // Get points for A2* lattice
-        float s = 0.366025403784439f * (x + y);
-        float xs = x + s, ys = y + s;
-
-        // Get base points and offsets
-        int xsb = fastFloor(xs), ysb = fastFloor(ys);
-        float xsi = xs - xsb, ysi = ys - ysb;
-
-        // Index to point list
-        int a = (int)(xsi + ysi);
-        int index =
-                (a << 2) |
-                        (int)(xsi + 1 - (ysi + a) * 0.5f) << 3 |
-                        (int)(ysi + 1 - (xsi + a) * 0.5f) << 4;
-
-        float ssi = (xsi + ysi) * -0.21132487f;
-        float xi = xsi + ssi, yi = ysi + ssi;
-
-        // Point contributions
-        for (int i = 0; i < 4; i++) {
-            LatticePoint2D c = LOOKUP_2D[index + i];
-
-            float dx = xi + c.dx, dy = yi + c.dy;
-            float attn = 0.6666667f - dx * dx - dy * dy;
-            if (attn <= 0) continue;
-
-            Float2 grad = GRADIENTS_2D[hash32((xsb + c.xsv), (ysb + c.ysv), seed)];
-            float extrapolation = grad.x * dx + grad.y * dy;
-
-            attn *= attn;
-            value += attn * attn * extrapolation;
-        }
-
-        return value;
-    }
-
-
 
 
 
