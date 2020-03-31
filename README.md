@@ -45,15 +45,55 @@ types should stay in that range.
 
 ### Previews of Noise Types
 
-- VALUE: ![Preview](https://i.imgur.com/At1Hgm5.png)
-- VALUE_FRACTAL: ![Preview](https://i.imgur.com/2b0qBrS.png)
-- PERLIN: ![Preview](https://i.imgur.com/z9461l1.png)
-- PERLIN_FRACTAL: ![Preview](https://i.imgur.com/DPItxKc.png)
-- SIMPLEX: ![Preview](https://i.imgur.com/9S7RrYP.png)
-- SIMPLEX_FRACTAL: ![Preview](https://i.imgur.com/m73kktY.png)
-- CELLULAR: ![Preview](https://i.imgur.com/Nu23Nf5.png)
-- WHITE_NOISE: ![Preview](https://i.imgur.com/Sv7uJYW.png)
-- CUBIC: ![Preview](https://i.imgur.com/XpLZiiL.png)
-- CUBIC_FRACTAL: ![Preview](https://i.imgur.com/7i9C8ah.png)
-- FOAM: ![Preview](https://i.imgur.com/L5iCStQ.png)
-- FOAM_FRACTAL: ![Preview](https://i.imgur.com/mCuEiAD.png)
+All are 2D.
+
+- VALUE: 
+  - ![Preview](https://i.imgur.com/At1Hgm5.png)
+- VALUE_FRACTAL: 
+  - ![Preview](https://i.imgur.com/2b0qBrS.png)
+- PERLIN: 
+  - ![Preview](https://i.imgur.com/z9461l1.png)
+- PERLIN_FRACTAL: 
+  - ![Preview](https://i.imgur.com/DPItxKc.png)
+- SIMPLEX: 
+  - ![Preview](https://i.imgur.com/9S7RrYP.png)
+- SIMPLEX_FRACTAL: 
+  - ![Preview](https://i.imgur.com/m73kktY.png)
+- CELLULAR: 
+  - ![Preview](https://i.imgur.com/Nu23Nf5.png)
+- WHITE_NOISE: 
+  - ![Preview](https://i.imgur.com/Sv7uJYW.png)
+- CUBIC: 
+  - ![Preview](https://i.imgur.com/XpLZiiL.png)
+- CUBIC_FRACTAL: 
+  - ![Preview](https://i.imgur.com/7i9C8ah.png)
+- FOAM: 
+  - ![Preview](https://i.imgur.com/L5iCStQ.png)
+- FOAM_FRACTAL: 
+  - ![Preview](https://i.imgur.com/mCuEiAD.png)
+
+### Some Fractal Type Previews
+
+All are 2D.
+
+- PERLIN_FRACTAL: 
+  - FBM
+     - ![Preview](https://i.imgur.com/DPItxKc.png)
+  - BILLOW
+     - ![Preview](https://i.imgur.com/6OTR2Xl.png)
+  - RIDGED_MULTI
+     - ![Preview](https://i.imgur.com/RyJgRVS.png)
+- SIMPLEX_FRACTAL: 
+  - FBM
+     - ![Preview](https://i.imgur.com/m73kktY.png)
+  - BILLOW
+     - ![Preview](https://i.imgur.com/4zCZ3C0.png)
+  - RIDGED_MULTI
+     - ![Preview](https://i.imgur.com/Be8ESjY.png)
+- FOAM_FRACTAL: 
+  - FBM
+     - ![Preview](https://i.imgur.com/mCuEiAD.png)
+  - BILLOW
+     - ![Preview](https://i.imgur.com/egJRuzg.png)
+  - RIDGED_MULTI
+     - ![Preview](https://i.imgur.com/2HNBlnD.png)
