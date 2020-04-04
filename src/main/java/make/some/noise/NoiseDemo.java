@@ -18,21 +18,21 @@ import static com.badlogic.gdx.graphics.GL20.GL_POINTS;
 
 /**
  */
-public class NoiseVisualizer extends ApplicationAdapter {
+public class NoiseDemo extends ApplicationAdapter {
 
     private int dim = 0; // this can be 0, 1, 2, or 3; these correspond to 2D, 3D, 4D, and 6D
-    private int octaves = 2;
+    private int octaves = 0;
     private float freq = 0.125f, speed = 0.618f;
     private boolean inverse = false;
     private ImmediateModeRenderer20 renderer;
-    private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX_FRACTAL, 3);
+    private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX, 1);
     private boolean color = false;
     private boolean threshold = false;
     private Noise red = new Noise(11111, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     private Noise green = new Noise(33333, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     private Noise blue = new Noise(77777, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     
-    private static final int width = 512, height = 512;
+    private static final int width = 707, height = 707;
 
     private InputAdapter input;
     
