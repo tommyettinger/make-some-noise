@@ -7,8 +7,6 @@
     <groupId>com.github.tommyettinger</groupId>
     <artifactId>make_some_noise</artifactId>
     <version>0.3-SNAPSHOT</version>
-    <modules>
-    </modules>
 
 
     <name>make_some_noise</name>

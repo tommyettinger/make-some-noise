@@ -22,7 +22,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 
     private int dim = 0; // this can be 0, 1, 2, or 3; these correspond to 2D, 3D, 4D, and 6D
     private int octaves = 2;
-    private float freq = 0.125f, speed = 0.618f;
+    private float freq = 0.125f, speed = 1f/6f;
     private boolean inverse = false;
     private ImmediateModeRenderer20 renderer;
     private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX_FRACTAL, 3);
@@ -32,7 +32,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
     private Noise green = new Noise(33333, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     private Noise blue = new Noise(77777, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     
-    private static final int width = 512, height = 512;
+    private static final int width = 256, height = 256;
 
     private InputAdapter input;
     
@@ -60,53 +60,47 @@ public class NoiseVisualizer extends ApplicationAdapter {
             @Override
             public boolean keyDown(int keycode) {
                 switch (keycode) {
-                    case MINUS:
+                case MINUS:
 //                        if(dim <= 3)
-                            noise.setNoiseType((noise.getNoiseType() + 11) % 12);
+                    noise.setNoiseType((noise.getNoiseType() + 11) % 12);
 //                        else
 //                            noise.setNoiseType((noise.getNoiseType() + 9) % 10);
-                        red.setNoiseType(noise.getNoiseType());
-                        green.setNoiseType(noise.getNoiseType());
-                        blue.setNoiseType(noise.getNoiseType());
-                        putMap();
-                        break;
-                    case EQUALS:
-                    case PLUS:
-                    case N: // noise type
+                    red.setNoiseType(noise.getNoiseType());
+                    green.setNoiseType(noise.getNoiseType());
+                    blue.setNoiseType(noise.getNoiseType());
+                    break;
+                case EQUALS:
+                case PLUS:
+                case N: // noise type
 //                        if(dim <= 3) 
-                            noise.setNoiseType((noise.getNoiseType() + 1) % 12);
+                    noise.setNoiseType((noise.getNoiseType() + 1) % 12);
 //                        else
 //                            noise.setNoiseType((noise.getNoiseType() + 1) % 10);
-                        red.setNoiseType(noise.getNoiseType());
-                        green.setNoiseType(noise.getNoiseType());
-                        blue.setNoiseType(noise.getNoiseType());
-                        putMap();
-                        break;
-                    case U:
-                        ctr++;
-                        putMap();
-                        break;
-                    case P: //pause
-                        keepGoing = !keepGoing;
-                    case C:
-                        color = !color;
-                        putMap();
-                        break;
-                    case E: //earlier seed
-                        noise.setSeed(noise.getSeed() - 1);
-                        red.setSeed(red.getSeed() - 1);
-                        green.setSeed(green.getSeed() - 1);
-                        blue.setSeed(blue.getSeed() - 1);
-                        putMap();
-                        break;
-                    case S: //seed
-                        noise.setSeed(noise.getSeed() + 1);
-                        red.setSeed(red.getSeed() + 1);
-                        green.setSeed(green.getSeed() + 1);
-                        blue.setSeed(blue.getSeed() + 1);
-                        putMap();
-                        break;
-                    case D: //dimension
+                    red.setNoiseType(noise.getNoiseType());
+                    green.setNoiseType(noise.getNoiseType());
+                    blue.setNoiseType(noise.getNoiseType());
+                    break;
+                case U:
+                    ctr++;
+                    break;
+                case P: //pause
+                    keepGoing = !keepGoing;
+                case C:
+                    color = !color;
+                    break;
+                case E: //earlier seed
+                    noise.setSeed(noise.getSeed() - 1);
+                    red.setSeed(red.getSeed() - 1);
+                    green.setSeed(green.getSeed() - 1);
+                    blue.setSeed(blue.getSeed() - 1);
+                    break;
+                case S: //seed
+                    noise.setSeed(noise.getSeed() + 1);
+                    red.setSeed(red.getSeed() + 1);
+                    green.setSeed(green.getSeed() + 1);
+                    blue.setSeed(blue.getSeed() + 1);
+                    break;
+                case D: //dimension
 //                        if(dim >= 2 && noise.getNoiseType() >= 10)
 //                        {
 //                            noise.setNoiseType(0);
@@ -114,74 +108,67 @@ public class NoiseVisualizer extends ApplicationAdapter {
 //                            green.setNoiseType(0);
 //                            blue.setNoiseType(0);
 //                        }
-                        dim = (dim + 1) & 3;
-                        putMap();
-                        break;
-                    case F: // frequency
-                        noise.setFrequency(Noise.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.11f + 0.17f);
-                        red.setFrequency(noise.getFrequency());
-                        green.setFrequency(noise.getFrequency());
-                        blue.setFrequency(noise.getFrequency());
-                        putMap();
-                        break;
-                    case R: // fRactal type
-                        noise.setFractalType((noise.getFractalType() + 1) % 3);
-                        red.setFractalType(noise.getFractalType());
-                        green.setFractalType(noise.getFractalType());
-                        blue.setFractalType(noise.getFractalType());
-                        putMap();
-                        break;
-                    case H: // higher octaves
-                        noise.setFractalOctaves((octaves = octaves + 1 & 3) + 1);
-                        red.setFractalOctaves(noise.getFractalOctaves());
-                        green.setFractalOctaves(noise.getFractalOctaves());
-                        blue.setFractalOctaves(noise.getFractalOctaves());
-                        putMap();
-                        break;
-                    case L: // lower octaves
-                        noise.setFractalOctaves((octaves = octaves + 3 & 3) + 1);
-                        red.setFractalOctaves(noise.getFractalOctaves());
-                        green.setFractalOctaves(noise.getFractalOctaves());
-                        blue.setFractalOctaves(noise.getFractalOctaves());
-                        putMap();
-                        break;
-                    case I: // inverse mode
-                        if (inverse = !inverse) {
-                            noise.setFractalLacunarity(0.5f);
-                            noise.setFractalGain(2f);
-                            red.setFractalLacunarity(0.5f);
-                            red.setFractalGain(2f);
-                            green.setFractalLacunarity(0.5f);
-                            green.setFractalGain(2f);
-                            blue.setFractalLacunarity(0.5f);
-                            blue.setFractalGain(2f);
-                        } else {
-                            noise.setFractalLacunarity(2f);
-                            noise.setFractalGain(0.5f);
-                            red.setFractalLacunarity(2f);
-                            red.setFractalGain(0.5f);
-                            green.setFractalLacunarity(2f);
-                            green.setFractalGain(0.5f);
-                            blue.setFractalLacunarity(2f);
-                            blue.setFractalGain(0.5f);
-                        }
-                        putMap();
-                        break;
-                    case T:
-                        threshold = !threshold;
-                        break;
-                    case K: // sKip
-                        ctr += 1000;
-                        putMap();
-                        break;
+                    dim = (dim + 1) & 3;
+                    break;
+                case F: // frequency
+                    noise.setFrequency(Noise.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.11f + 0.17f);
+                    red.setFrequency(noise.getFrequency());
+                    green.setFrequency(noise.getFrequency());
+                    blue.setFrequency(noise.getFrequency());
+                    break;
+                case R: // fRactal type
+                    noise.setFractalType((noise.getFractalType() + 1) % 3);
+                    red.setFractalType(noise.getFractalType());
+                    green.setFractalType(noise.getFractalType());
+                    blue.setFractalType(noise.getFractalType());
+                    break;
+                case H: // higher octaves
+                    noise.setFractalOctaves((octaves = octaves + 1 & 3) + 1);
+                    red.setFractalOctaves(noise.getFractalOctaves());
+                    green.setFractalOctaves(noise.getFractalOctaves());
+                    blue.setFractalOctaves(noise.getFractalOctaves());
+                    break;
+                case L: // lower octaves
+                    noise.setFractalOctaves((octaves = octaves + 3 & 3) + 1);
+                    red.setFractalOctaves(noise.getFractalOctaves());
+                    green.setFractalOctaves(noise.getFractalOctaves());
+                    blue.setFractalOctaves(noise.getFractalOctaves());
+                    break;
+                case I: // inverse mode
+                    if (inverse = !inverse) {
+                        noise.setFractalLacunarity(0.5f);
+                        noise.setFractalGain(2f);
+                        red.setFractalLacunarity(0.5f);
+                        red.setFractalGain(2f);
+                        green.setFractalLacunarity(0.5f);
+                        green.setFractalGain(2f);
+                        blue.setFractalLacunarity(0.5f);
+                        blue.setFractalGain(2f);
+                    } else {
+                        noise.setFractalLacunarity(2f);
+                        noise.setFractalGain(0.5f);
+                        red.setFractalLacunarity(2f);
+                        red.setFractalGain(0.5f);
+                        green.setFractalLacunarity(2f);
+                        green.setFractalGain(0.5f);
+                        blue.setFractalLacunarity(2f);
+                        blue.setFractalGain(0.5f);
+                    }
+                    break;
+                case T:
+                    threshold = !threshold;
+                    break;
+                case K: // sKip
+                    ctr += 1000;
+                    break;
                 case A: // Acceleration
                     speed = (1.5f + MathUtils.cosDeg(TimeUtils.timeSinceMillis(startTime))) * 0.5f;
                     break;
-                    case Q:
-                    case ESCAPE: {
-                        Gdx.app.exit();
-                        return true;
-                    }
+                case Q:
+                case ESCAPE: {
+                    Gdx.app.exit();
+                    return true;
+                }
                 }
                 return true;
             }
@@ -197,7 +184,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 //        blue.setFrequency(noise.getFrequency());
 
         renderer.begin(view.getCamera().combined, GL_POINTS);
-        float c = (TimeUtils.timeSinceMillis(startTime) >>> 4 & 0xFFFFFL) * speed + ctr;
+        float c = (TimeUtils.timeSinceMillis(startTime) >>> 3 & 0xFFFFFL) * (speed / (dim * dim + 3)) + ctr;
         if(color)
         {
             switch (dim) {
@@ -232,20 +219,17 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     }
                     break;
                 case 3:
-                    float xx, yy;
                     for (int x = 0; x < width; x++) {
-                        xx = x * 0x1p-4f;
                         for (int y = 0; y < height; y++) {
-                            yy = y * 0x1p-4f;
                             renderer.color(basicPrepare(red.getConfiguredNoise(
-                                    c + xx, x + c, y - c,
-                                    c - yy, x +  yy, y - xx)),
+                                x + c, c - x, y + c,
+                                y - c, x + y, x - y)),
                                     basicPrepare(green.getConfiguredNoise(
-                                            c + xx, x + c, y - c,
-                                            c - yy, x +  yy, y - xx)),
+                                        x + c, c - x, y + c,
+                                        y - c, x + y, x - y)),
                                     basicPrepare(blue.getConfiguredNoise(
-                                            c + xx, x + c, y - c,
-                                            c - yy, x +  yy, y - xx)), 1f);
+                                        x + c, c - x, y + c,
+                                        y - c, x + y, x - y)), 1f);
                             renderer.vertex(x, y, 0);
                         }
                     }
@@ -257,7 +241,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                 case 0:
                     for (int x = 0; x < width; x++) {
                         for (int y = 0; y < height; y++) {
-                            renderer.color(noise.getConfiguredNoise(x + c * 0.25f, y + c * 0.25f) >= 0f ? WHITE : BLACK);
+                            renderer.color(noise.getConfiguredNoise(x + c, y + c) >= 0f ? WHITE : BLACK);
                             renderer.vertex(x, y, 0);
                         }
                     }
@@ -279,14 +263,11 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     }
                     break;
                 case 3:
-                    float xx, yy;
                     for (int x = 0; x < width; x++) {
-                        xx = x * 0x1p-4f;
                         for (int y = 0; y < height; y++) {
-                            yy = y * 0x1p-4f;
                             renderer.color(noise.getConfiguredNoise(
-                                    c + xx, x + c, y - c,
-                                    c - yy, x +  yy, y - xx) >= 0f ? WHITE : BLACK);
+                                x + c, c - x, y + c,
+                                y - c, x + y, x - y) >= 0f ? WHITE : BLACK);
                             renderer.vertex(x, y, 0);
                         }
                     }
@@ -326,7 +307,6 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     }
                     break;
                 case 3:
-                    c *= 0x1p-3f;
                     for (int x = 0; x < width; x++) {
                         for (int y = 0; y < height; y++) {
                             bright = basicPrepare(noise.getConfiguredNoise(

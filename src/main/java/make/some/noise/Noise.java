@@ -3538,7 +3538,7 @@ public class Noise implements Serializable {
         return singlePerlin(seed, x * frequency, y * frequency);
     }
 
-    private float singlePerlin(int seed, float x, float y) {
+    public float singlePerlin(int seed, float x, float y) {
         int x0 = fastFloor(x);
         int y0 = fastFloor(y);
         int x1 = x0 + 1;
@@ -3643,7 +3643,7 @@ public class Noise implements Serializable {
         return singlePerlin(seed, x * frequency, y * frequency, z * frequency);
     }
 
-    private float singlePerlin(int seed, float x, float y, float z) {
+    public float singlePerlin(int seed, float x, float y, float z) {
         int x0 = fastFloor(x);
         int y0 = fastFloor(y);
         int z0 = fastFloor(z);
@@ -3764,7 +3764,7 @@ public class Noise implements Serializable {
         return singlePerlin(seed, x * frequency, y * frequency, z * frequency, w * frequency);
     }
 
-    private float singlePerlin(int seed, float x, float y, float z, float w) {
+    public float singlePerlin(int seed, float x, float y, float z, float w) {
         int x0 = fastFloor(x);
         int y0 = fastFloor(y);
         int z0 = fastFloor(z);
@@ -3822,7 +3822,7 @@ public class Noise implements Serializable {
 
         final float zf0 = lerp(yf00, yf10, zs);
         final float zf1 = lerp(yf01, yf11, zs);
-        return lerp(zf0, zf1, ws) * 0.625f;
+        return lerp(zf0, zf1, ws) * 0.55f;
     }
 
     public float getPerlinFractal(float x, float y, float z, float w, float u, float v) {
@@ -3908,7 +3908,7 @@ public class Noise implements Serializable {
         return singlePerlin(seed, x * frequency, y * frequency, z * frequency, w * frequency, u * frequency, v * frequency);
     }
 
-    private float singlePerlin(int seed, float x, float y, float z, float w, float u, float v) {
+    public float singlePerlin(int seed, float x, float y, float z, float w, float u, float v) {
         int x0 = fastFloor(x);
         int y0 = fastFloor(y);
         int z0 = fastFloor(z);
@@ -4040,7 +4040,7 @@ public class Noise implements Serializable {
         final float uf0 = lerp(wf00, wf10, us);
         final float uf1 = lerp(wf01, wf11, us);
 
-        return lerp(uf0, uf1, vs);
+        return lerp(uf0, uf1, vs) * 1.75f;
     }
 
     public float getSimplexFractal(float x, float y) {
