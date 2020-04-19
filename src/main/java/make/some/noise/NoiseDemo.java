@@ -21,21 +21,21 @@ import static com.badlogic.gdx.graphics.GL20.GL_POINTS;
 public class NoiseDemo extends ApplicationAdapter {
 
     private int dim = 0; // this can be 0, 1, 2, or 3; these correspond to 2D, 3D, 4D, and 6D
-    private int octaves = 0;
-    private float freq = 0.125f, speed = 0.618f;
+    private int octaves = 2;
+    private float freq = 0.125f, speed = 1f/6f;
     private boolean inverse = false;
     private ImmediateModeRenderer20 renderer;
-    private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX, 1);
+    private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX_FRACTAL, 3);
     private boolean color = false;
     private boolean threshold = false;
     private Noise red = new Noise(11111, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     private Noise green = new Noise(33333, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
     private Noise blue = new Noise(77777, 1f/32f, Noise.SIMPLEX_FRACTAL, 1);
-    
-    private static final int width = 707, height = 707;
+
+    private static final int width = 256, height = 256;
 
     private InputAdapter input;
-    
+
     private Viewport view;
     private int ctr = -256;
     private long startTime;
@@ -50,63 +50,58 @@ public class NoiseDemo extends ApplicationAdapter {
     public void create() {
         startTime = TimeUtils.millis();
         // not sure if this is always needed...
-        Gdx.gl.glDisable(GL20.GL_BLEND);
+        //Gdx.gl.glDisable(GL20.GL_BLEND);
         renderer = new ImmediateModeRenderer20(width * height, false, true, 0);
         view = new ScreenViewport();
-        
+
         //noise.setInterpolation(Noise.QUINTIC);
 
         input = new InputAdapter(){
             @Override
-            public boolean keyDown(int keycode) {
+            public boolean keyUp(int keycode) {
                 switch (keycode) {
-                    case MINUS:
+                case MINUS:
 //                        if(dim <= 3)
-                            noise.setNoiseType((noise.getNoiseType() + 11) % 12);
+                    noise.setNoiseType((noise.getNoiseType() + 11) % 12);
 //                        else
 //                            noise.setNoiseType((noise.getNoiseType() + 9) % 10);
-                        red.setNoiseType(noise.getNoiseType());
-                        green.setNoiseType(noise.getNoiseType());
-                        blue.setNoiseType(noise.getNoiseType());
-                        putMap();
-                        break;
-                    case EQUALS:
-                    case PLUS:
-                    case N: // noise type
+                    red.setNoiseType(noise.getNoiseType());
+                    green.setNoiseType(noise.getNoiseType());
+                    blue.setNoiseType(noise.getNoiseType());
+                    break;
+                case EQUALS:
+                case PLUS:
+                case N: // noise type
 //                        if(dim <= 3) 
-                            noise.setNoiseType((noise.getNoiseType() + 1) % 12);
+                    noise.setNoiseType((noise.getNoiseType() + 1) % 12);
 //                        else
 //                            noise.setNoiseType((noise.getNoiseType() + 1) % 10);
-                        red.setNoiseType(noise.getNoiseType());
-                        green.setNoiseType(noise.getNoiseType());
-                        blue.setNoiseType(noise.getNoiseType());
-                        putMap();
-                        break;
-                    case U:
-                        ctr++;
-                        putMap();
-                        break;
-                    case P: //pause
-                        keepGoing = !keepGoing;
-                    case C:
-                        color = !color;
-                        putMap();
-                        break;
-                    case E: //earlier seed
-                        noise.setSeed(noise.getSeed() - 1);
-                        red.setSeed(red.getSeed() - 1);
-                        green.setSeed(green.getSeed() - 1);
-                        blue.setSeed(blue.getSeed() - 1);
-                        putMap();
-                        break;
-                    case S: //seed
-                        noise.setSeed(noise.getSeed() + 1);
-                        red.setSeed(red.getSeed() + 1);
-                        green.setSeed(green.getSeed() + 1);
-                        blue.setSeed(blue.getSeed() + 1);
-                        putMap();
-                        break;
-                    case D: //dimension
+                    red.setNoiseType(noise.getNoiseType());
+                    green.setNoiseType(noise.getNoiseType());
+                    blue.setNoiseType(noise.getNoiseType());
+                    break;
+                case U:
+                    ctr++;
+                    break;
+                case C:
+                    color = !color;
+                    break;
+                case P: //pause
+                    keepGoing = !keepGoing;
+                    break;
+                case E: //earlier seed
+                    noise.setSeed(noise.getSeed() - 1);
+                    red.setSeed(red.getSeed() - 1);
+                    green.setSeed(green.getSeed() - 1);
+                    blue.setSeed(blue.getSeed() - 1);
+                    break;
+                case S: //seed
+                    noise.setSeed(noise.getSeed() + 1);
+                    red.setSeed(red.getSeed() + 1);
+                    green.setSeed(green.getSeed() + 1);
+                    blue.setSeed(blue.getSeed() + 1);
+                    break;
+                case D: //dimension
 //                        if(dim >= 2 && noise.getNoiseType() >= 10)
 //                        {
 //                            noise.setNoiseType(0);
@@ -114,74 +109,67 @@ public class NoiseDemo extends ApplicationAdapter {
 //                            green.setNoiseType(0);
 //                            blue.setNoiseType(0);
 //                        }
-                        dim = (dim + 1) & 3;
-                        putMap();
-                        break;
-                    case F: // frequency
-                        noise.setFrequency(Noise.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.11f + 0.17f);
-                        red.setFrequency(noise.getFrequency());
-                        green.setFrequency(noise.getFrequency());
-                        blue.setFrequency(noise.getFrequency());
-                        putMap();
-                        break;
-                    case R: // fRactal type
-                        noise.setFractalType((noise.getFractalType() + 1) % 3);
-                        red.setFractalType(noise.getFractalType());
-                        green.setFractalType(noise.getFractalType());
-                        blue.setFractalType(noise.getFractalType());
-                        putMap();
-                        break;
-                    case H: // higher octaves
-                        noise.setFractalOctaves((octaves = octaves + 1 & 3) + 1);
-                        red.setFractalOctaves(noise.getFractalOctaves());
-                        green.setFractalOctaves(noise.getFractalOctaves());
-                        blue.setFractalOctaves(noise.getFractalOctaves());
-                        putMap();
-                        break;
-                    case L: // lower octaves
-                        noise.setFractalOctaves((octaves = octaves + 3 & 3) + 1);
-                        red.setFractalOctaves(noise.getFractalOctaves());
-                        green.setFractalOctaves(noise.getFractalOctaves());
-                        blue.setFractalOctaves(noise.getFractalOctaves());
-                        putMap();
-                        break;
-                    case I: // inverse mode
-                        if (inverse = !inverse) {
-                            noise.setFractalLacunarity(0.5f);
-                            noise.setFractalGain(2f);
-                            red.setFractalLacunarity(0.5f);
-                            red.setFractalGain(2f);
-                            green.setFractalLacunarity(0.5f);
-                            green.setFractalGain(2f);
-                            blue.setFractalLacunarity(0.5f);
-                            blue.setFractalGain(2f);
-                        } else {
-                            noise.setFractalLacunarity(2f);
-                            noise.setFractalGain(0.5f);
-                            red.setFractalLacunarity(2f);
-                            red.setFractalGain(0.5f);
-                            green.setFractalLacunarity(2f);
-                            green.setFractalGain(0.5f);
-                            blue.setFractalLacunarity(2f);
-                            blue.setFractalGain(0.5f);
-                        }
-                        putMap();
-                        break;
-                    case T:
-                        threshold = !threshold;
-                        break;
-                    case K: // sKip
-                        ctr += 1000;
-                        putMap();
-                        break;
+                    dim = (dim + 1) & 3;
+                    break;
+                case F: // frequency
+                    noise.setFrequency(Noise.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.05f + 0.07f);
+                    red.setFrequency(noise.getFrequency());
+                    green.setFrequency(noise.getFrequency());
+                    blue.setFrequency(noise.getFrequency());
+                    break;
+                case R: // fRactal type
+                    noise.setFractalType((noise.getFractalType() + 1) % 3);
+                    red.setFractalType(noise.getFractalType());
+                    green.setFractalType(noise.getFractalType());
+                    blue.setFractalType(noise.getFractalType());
+                    break;
+                case H: // higher octaves
+                    noise.setFractalOctaves((octaves = octaves + 1 & 3) + 1);
+                    red.setFractalOctaves(noise.getFractalOctaves());
+                    green.setFractalOctaves(noise.getFractalOctaves());
+                    blue.setFractalOctaves(noise.getFractalOctaves());
+                    break;
+                case L: // lower octaves
+                    noise.setFractalOctaves((octaves = octaves + 3 & 3) + 1);
+                    red.setFractalOctaves(noise.getFractalOctaves());
+                    green.setFractalOctaves(noise.getFractalOctaves());
+                    blue.setFractalOctaves(noise.getFractalOctaves());
+                    break;
+                case I: // inverse mode
+                    if (inverse = !inverse) {
+                        noise.setFractalLacunarity(0.5f);
+                        noise.setFractalGain(2f);
+                        red.setFractalLacunarity(0.5f);
+                        red.setFractalGain(2f);
+                        green.setFractalLacunarity(0.5f);
+                        green.setFractalGain(2f);
+                        blue.setFractalLacunarity(0.5f);
+                        blue.setFractalGain(2f);
+                    } else {
+                        noise.setFractalLacunarity(2f);
+                        noise.setFractalGain(0.5f);
+                        red.setFractalLacunarity(2f);
+                        red.setFractalGain(0.5f);
+                        green.setFractalLacunarity(2f);
+                        green.setFractalGain(0.5f);
+                        blue.setFractalLacunarity(2f);
+                        blue.setFractalGain(0.5f);
+                    }
+                    break;
+                case T:
+                    threshold = !threshold;
+                    break;
+                case K: // sKip
+                    ctr += 1000;
+                    break;
                 case A: // Acceleration
                     speed = (1.5f + MathUtils.cosDeg(TimeUtils.timeSinceMillis(startTime))) * 0.5f;
                     break;
-                    case Q:
-                    case ESCAPE: {
-                        Gdx.app.exit();
-                        return true;
-                    }
+                case Q:
+                case ESCAPE: {
+                    Gdx.app.exit();
+                    return true;
+                }
                 }
                 return true;
             }
@@ -197,146 +185,139 @@ public class NoiseDemo extends ApplicationAdapter {
 //        blue.setFrequency(noise.getFrequency());
 
         renderer.begin(view.getCamera().combined, GL_POINTS);
-        float c = (TimeUtils.timeSinceMillis(startTime) >>> 4 & 0xFFFFFL) * speed + ctr;
+        float c = (TimeUtils.timeSinceMillis(startTime) >>> 2 & 0xFFFFFL) * (speed / (0.5f * dim * dim + 1)) + ctr;
         if(color)
         {
             switch (dim) {
-                case 0:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            renderer.color(basicPrepare(red.getConfiguredNoise(x + c, y + c)),
-                                    basicPrepare(green.getConfiguredNoise(x + c, y + c)),
-                                    basicPrepare(blue.getConfiguredNoise(x + c, y + c)), 1f);
-                            renderer.vertex(x, y, 0);
-                        }
+            case 0:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        renderer.color(basicPrepare(red.getConfiguredNoise(x + c, y + c)),
+                            basicPrepare(green.getConfiguredNoise(x + c, y + c)),
+                            basicPrepare(blue.getConfiguredNoise(x + c, y + c)), 1f);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 1:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            renderer.color(basicPrepare(red.getConfiguredNoise(x, y, c)),
-                                    basicPrepare(green.getConfiguredNoise(x, y, c)),
-                                    basicPrepare(blue.getConfiguredNoise(x, y, c)), 1f);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 1:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        renderer.color(basicPrepare(red.getConfiguredNoise(x, y, c)),
+                            basicPrepare(green.getConfiguredNoise(x, y, c)),
+                            basicPrepare(blue.getConfiguredNoise(x, y, c)), 1f);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 2:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            renderer.color(basicPrepare(red.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c))),
-                                    basicPrepare(green.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c))),
-                                    basicPrepare(blue.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c))), 1f);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 2:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        renderer.color(basicPrepare(red.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c))),
+                            basicPrepare(green.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c))),
+                            basicPrepare(blue.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c))), 1f);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 3:
-                    float xx, yy;
-                    for (int x = 0; x < width; x++) {
-                        xx = x * 0x1p-4f;
-                        for (int y = 0; y < height; y++) {
-                            yy = y * 0x1p-4f;
-                            renderer.color(basicPrepare(red.getConfiguredNoise(
-                                    c + xx, x + c, y - c,
-                                    c - yy, x +  yy, y - xx)),
-                                    basicPrepare(green.getConfiguredNoise(
-                                            c + xx, x + c, y - c,
-                                            c - yy, x +  yy, y - xx)),
-                                    basicPrepare(blue.getConfiguredNoise(
-                                            c + xx, x + c, y - c,
-                                            c - yy, x +  yy, y - xx)), 1f);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 3:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        renderer.color(basicPrepare(red.getConfiguredNoise(
+                            x + c, c - x, y + c,
+                            y - c, x + y, x - y)),
+                            basicPrepare(green.getConfiguredNoise(
+                                x + c, c - x, y + c,
+                                y - c, x + y, x - y)),
+                            basicPrepare(blue.getConfiguredNoise(
+                                x + c, c - x, y + c,
+                                y - c, x + y, x - y)), 1f);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
+                }
+                break;
             }
         }
         else if(threshold){
             switch (dim){
-                case 0:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            renderer.color(noise.getConfiguredNoise(x + c * 0.25f, y + c * 0.25f) >= 0f ? WHITE : BLACK);
-                            renderer.vertex(x, y, 0);
-                        }
+            case 0:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        renderer.color(noise.getConfiguredNoise(x + c, y + c) >= 0f ? WHITE : BLACK);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 1:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            renderer.color(noise.getConfiguredNoise(x, y, c) >= 0f ? WHITE : BLACK);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 1:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        renderer.color(noise.getConfiguredNoise(x, y, c) >= 0f ? WHITE : BLACK);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 2:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            renderer.color(noise.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c)) >= 0f ? WHITE : BLACK);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 2:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        renderer.color(noise.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c)) >= 0f ? WHITE : BLACK);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 3:
-                    float xx, yy;
-                    for (int x = 0; x < width; x++) {
-                        xx = x * 0x1p-4f;
-                        for (int y = 0; y < height; y++) {
-                            yy = y * 0x1p-4f;
-                            renderer.color(noise.getConfiguredNoise(
-                                    c + xx, x + c, y - c,
-                                    c - yy, x +  yy, y - xx) >= 0f ? WHITE : BLACK);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 3:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        renderer.color(noise.getConfiguredNoise(
+                            x + c, c - x, y + c,
+                            y - c, x + y, x - y) >= 0f ? WHITE : BLACK);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                
+                }
+                break;
+
             }
         }
-        else 
+        else
         {
             float bright;
             switch (dim) {
-                case 0:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            bright = basicPrepare(noise.getConfiguredNoise(x + c, y + c));
-                            renderer.color(bright, bright, bright, 1f);
-                            renderer.vertex(x, y, 0);
-                        }
+            case 0:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        bright = basicPrepare(noise.getConfiguredNoise(x + c, y + c));
+                        renderer.color(bright, bright, bright, 1f);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 1:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            bright = basicPrepare(noise.getConfiguredNoise(x, y, c));
-                            renderer.color(bright, bright, bright, 1f);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 1:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        bright = basicPrepare(noise.getConfiguredNoise(x, y, c));
+                        renderer.color(bright, bright, bright, 1f);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 2:
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            bright = basicPrepare(noise.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c)));
-                            renderer.color(bright, bright, bright, 1f);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 2:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        bright = basicPrepare(noise.getConfiguredNoise(x, y, c, 0x1p-4f * (x + y - c)));
+                        renderer.color(bright, bright, bright, 1f);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
-                case 3:
-                    c *= 0x1p-3f;
-                    for (int x = 0; x < width; x++) {
-                        for (int y = 0; y < height; y++) {
-                            bright = basicPrepare(noise.getConfiguredNoise(
-                                    x + c, c - x, y + c,
-                                    y - c, x + y, x - y));
-                            renderer.color(bright, bright, bright, 1f);
-                            renderer.vertex(x, y, 0);
-                        }
+                }
+                break;
+            case 3:
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        bright = basicPrepare(noise.getConfiguredNoise(
+                            x + c, c - x, y + c,
+                            y - c, x + y, x - y));
+                        renderer.color(bright, bright, bright, 1f);
+                        renderer.vertex(x, y, 0);
                     }
-                    break;
+                }
+                break;
             }
         }
         renderer.end();
@@ -348,10 +329,14 @@ public class NoiseDemo extends ApplicationAdapter {
         Gdx.graphics.setTitle(String.valueOf(Gdx.graphics.getFramesPerSecond()));
         if (keepGoing) {
             // standard clear the background routine for libGDX
-            //Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
-            //Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             //ctr++;
             putMap();
+        }
+        else {
+            renderer.begin(view.getCamera().combined, GL_POINTS);
+            renderer.end();
         }
     }
 

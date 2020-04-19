@@ -50,7 +50,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
     public void create() {
         startTime = TimeUtils.millis();
         // not sure if this is always needed...
-        Gdx.gl.glDisable(GL20.GL_BLEND);
+        //Gdx.gl.glDisable(GL20.GL_BLEND);
         renderer = new ImmediateModeRenderer20(width * height, false, true, 0);
         view = new ScreenViewport();
         
@@ -58,7 +58,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 
         input = new InputAdapter(){
             @Override
-            public boolean keyDown(int keycode) {
+            public boolean keyUp(int keycode) {
                 switch (keycode) {
                 case MINUS:
 //                        if(dim <= 3)
@@ -83,10 +83,11 @@ public class NoiseVisualizer extends ApplicationAdapter {
                 case U:
                     ctr++;
                     break;
-                case P: //pause
-                    keepGoing = !keepGoing;
                 case C:
                     color = !color;
+                    break;
+                case P: //pause
+                    keepGoing = !keepGoing;
                     break;
                 case E: //earlier seed
                     noise.setSeed(noise.getSeed() - 1);
@@ -111,7 +112,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     dim = (dim + 1) & 3;
                     break;
                 case F: // frequency
-                    noise.setFrequency(Noise.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.11f + 0.17f);
+                    noise.setFrequency(Noise.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.05f + 0.07f);
                     red.setFrequency(noise.getFrequency());
                     green.setFrequency(noise.getFrequency());
                     blue.setFrequency(noise.getFrequency());
@@ -184,7 +185,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 //        blue.setFrequency(noise.getFrequency());
 
         renderer.begin(view.getCamera().combined, GL_POINTS);
-        float c = (TimeUtils.timeSinceMillis(startTime) >>> 3 & 0xFFFFFL) * (speed / (dim * dim + 3)) + ctr;
+        float c = (TimeUtils.timeSinceMillis(startTime) >>> 2 & 0xFFFFFL) * (speed / (0.5f * dim * dim + 1)) + ctr;
         if(color)
         {
             switch (dim) {
@@ -328,10 +329,14 @@ public class NoiseVisualizer extends ApplicationAdapter {
         Gdx.graphics.setTitle(String.valueOf(Gdx.graphics.getFramesPerSecond()));
         if (keepGoing) {
             // standard clear the background routine for libGDX
-            //Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
-            //Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             //ctr++;
             putMap();
+        }
+        else {
+            renderer.begin(view.getCamera().combined, GL_POINTS);
+            renderer.end();
         }
     }
 
@@ -350,6 +355,6 @@ public class NoiseVisualizer extends ApplicationAdapter {
         config.foregroundFPS = 0;
         config.vSyncEnabled = false;
         config.resizable = false;
-        new LwjglApplication(new NoiseDemo(), config);
+        new LwjglApplication(new NoiseVisualizer(), config);
     }
 }
