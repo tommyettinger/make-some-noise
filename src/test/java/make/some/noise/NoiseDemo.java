@@ -355,6 +355,7 @@ public class NoiseDemo extends ApplicationAdapter {
         config.foregroundFPS = 0;
         config.vSyncEnabled = false;
         config.resizable = false;
+        config.forceExit = false; // where config is your LwjglApplicationConfiguration
         new LwjglApplication(new NoiseDemo(), config);
     }
 }
