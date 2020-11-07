@@ -944,15 +944,6 @@ public class Noise implements Serializable {
                     default:
                         return singleSimplexFractalFBM(x, y, z, w);
                 }
-//            case CELLULAR:
-//                switch (cellularReturnType) {
-//                    case CELL_VALUE:
-//                    case NOISE_LOOKUP:
-//                    case DISTANCE:
-//                        return singleCellular(x, y, z);
-//                    default:
-//                        return singleCellular2Edge(x, y, z);
-//                }
             case WHITE_NOISE:
                 return getWhiteNoise(x, y, z, w);
             default:
@@ -3035,9 +3026,7 @@ public class Noise implements Serializable {
     public float getPerlin(float x, float y, float z, float w, float u) {
         return singlePerlin(seed, x * frequency, y * frequency, z * frequency, w * frequency, u * frequency);
     }
-
-//    public float minBound = -1f, maxBound = 1f;
-
+    
     public float singlePerlin(int seed, float x, float y, float z, float w, float u) {
         int x0 = fastFloor(x);
         int y0 = fastFloor(y);
@@ -3121,19 +3110,7 @@ public class Noise implements Serializable {
         final float wf0 = lerp(zf00, zf10, ws);
         final float wf1 = lerp(zf01, zf11, ws);
 
-        return lerp(wf0, wf1, us) * 0.73333333333333f;
-//        final float res = lerp(wf0, wf1, us) * 0.73333333333333f;
-//        if(res < minBound)
-//        {
-//            System.out.println(minBound = res);
-//            return -1f;
-//        }
-//        else if(res > maxBound)
-//        {
-//            System.out.println(maxBound = res);
-//            return 1f;
-//        }
-//        return res;
+        return lerp(wf0, wf1, us) * 0.7777777f;
     }
     private float singlePerlinFractalFBM(float x, float y, float z, float w, float u) {
         int seed = this.seed;
@@ -3333,7 +3310,7 @@ public class Noise implements Serializable {
         final float uf0 = lerp(wf00, wf10, us);
         final float uf1 = lerp(wf01, wf11, us);
 
-        return lerp(uf0, uf1, vs) * 1.75f;
+        return lerp(uf0, uf1, vs) * 1.61f;
     }
     private float singlePerlinFractalFBM(float x, float y, float z, float w, float u, float v) {
         int seed = this.seed;
@@ -5340,16 +5317,6 @@ public class Noise implements Serializable {
     public float singleHoney(int seed, float x, float y) {
         final float result = (singleSimplex(seed, x, y) + singleValue(seed ^ 0x9E3779B9, x, y)) * 0.5f + 1f;
         return (result <= 1f) ? result * result - 1f : (result - 2f) * -(result - 2f) + 1f;
-
-        //return singleSimplex(seed, x, y, 0.5f * singleSimplex(seed * 0xDAB ^ 0x9E3779BD, x, y));
-//        return singleSimplex(seed, x, y + 0.25f * singleSimplex(seed * 0xDAB ^ 0x9E3779BD, y, x));
-//        return singleSimplex(seed, x + NumberTools.swayRandomized(seed, y) * 0.25f, y + NumberTools.swayRandomized(seed, x) * 0.25f);
-
-//        final float a = singleSimplex(seed, x, y);
-//        seed += 0x9E3779BD;
-//        seed ^= seed >>> 14;
-//        final float b = singleSimplex(seed, x + a * 0.25f, y);
-//        return NumberTools.sin_((a + b) * 0.25f); 
     }
 
     public float getHoneyFractal(float x, float y) {

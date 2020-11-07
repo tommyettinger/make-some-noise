@@ -8,6 +8,8 @@ import org.junit.Test;
  */
 public class NoiseTests {
 
+	public static final int TRIAL_COUNT = 9000000;
+	
 	@Test
 	public void testRange2D()
 	{
@@ -27,7 +29,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -50,57 +52,127 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
-	public void testRange4D()
-	{
-		Noise noise = new Noise(543212345, 3.14159265f);
-		long state = 12345678L;
-		float x, y, z, w, result;
+	public void testRange4D() {
+		Noise noise = new Noise(543212345, 1f, Noise.SIMPLEX);
+		long state = 12345678901L;
+		float x, y, z, w, result, xLo = 0, yLo = 0, zLo = 0, wLo = 0, xHi = 0, yHi = 0, zHi = 0, wHi = 0;
 		float min = 0.5f, max = 0.5f;
-		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
-			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			w = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+		for (int i = 0; i < TRIAL_COUNT; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			w = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			result = noise.singleSimplex((int)state, x, y, z, w);
-			min = Math.min(min, result);
-			max = Math.max(max, result);
-			if(result > 1f)
-				higher++;
-			if(result < -1f)
-				lower++;
+			if (result == (min = Math.min(min, result))) {
+				xLo = x;
+				yLo = y;
+				zLo = z;
+				wLo = w;
+			}
+			if (result == (max = Math.max(max, result))) {
+				xHi = x;
+				yHi = y;
+				zHi = z;
+				wHi = w;
+			}
 		}
-		System.out.println("4D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("Preliminary 4D min=" + min + ",max=" + max + ",multiplier=" + (1f / Math.max(-min, max)));
+		for (float g = -0.5f; g <= 0.5f; g += 0x1p-3f) {
+			for (float h = -0.5f; h <= 0.5f; h += 0x1p-3f) {
+				for (float i = -0.5f; i <= 0.5f; i += 0x1p-3f) {
+					for (float j = -0.5f; j <= 0.5f; j += 0x1p-3f) {
+						min = Math.min(min, noise.singleSimplex((int)state, xLo + g, yLo + h, zLo + i, wLo + j));
+						max = Math.max(max, noise.singleSimplex((int)state, xHi + g, yHi + h, zHi + i, wHi + j));
+					}
+				}
+			}
+		}
+		System.out.println("Better 4D min=" + min + ",max=" + max + ",multiplier=" + (1f / Math.max(-min, max)));
+	}
+
+	@Test
+	public void testRange5D()
+	{
+		Noise noise = new Noise(543212345, 1f, Noise.SIMPLEX);
+		long state = 12345678901L;
+		float x, y, z, w, u, result, xLo=0, yLo=0, zLo=0, wLo=0, uLo=0, xHi=0, yHi=0, zHi=0, wHi=0, uHi=0;
+		float min = 0.5f, max = 0.5f;
+		for (int i = 0; i < TRIAL_COUNT; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			w = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			u = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			result = noise.singleSimplex((int)state, x, y, z, w, u);
+			if(result == (min = Math.min(min, result)))
+			{
+				xLo = x; yLo = y; zLo = z; wLo = w; uLo = u;
+			}
+			if(result == (max = Math.max(max, result)))
+			{
+				xHi = x; yHi = y; zHi = z; wHi = w; uHi = u;
+			}
+		}
+		System.out.println("Preliminary 5D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
+		for (float e = -0.5f; e <= 0.5f; e += 0x1p-3f) {
+			for (float g = -0.5f; g <= 0.5f; g += 0x1p-3f) {
+				for (float h = -0.5f; h <= 0.5f; h += 0x1p-3f) {
+					for (float i = -0.5f; i <= 0.5f; i += 0x1p-3f) {
+						for (float j = -0.5f; j <= 0.5f; j += 0x1p-3f) {
+							min = Math.min(min, noise.singleSimplex((int)state, xLo + g, yLo + h, zLo + i, wLo + j, uLo + e));
+							max = Math.max(max, noise.singleSimplex((int)state, xHi + g, yHi + h, zHi + i, wHi + j, uHi + e));
+						}
+					}
+				}
+			}
+		}
+		System.out.println("Better 5D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
 	public void testRange6D()
 	{
-		Noise noise = new Noise(543212345, 3.14159265f);
-		long state = 12345678L;
-		float x, y, z, w, u, v, result;
+		Noise noise = new Noise(543212345, 1f, Noise.SIMPLEX);
+		long state = 12345678901L;
+		float x, y, z, w, u, v, result, xLo=0, yLo=0, zLo=0, wLo=0, uLo=0, vLo=0, xHi=0, yHi=0, zHi=0, wHi=0, uHi=0, vHi=0;
 		float min = 0.5f, max = 0.5f;
-		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
-			x = (state >> 57) / (1.0001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			y = (state >> 57) / (1.0001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			z = (state >> 57) / (1.0001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			w = (state >> 57) / (1.0001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			u = (state >> 57) / (1.0001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			v = (state >> 57) / (1.0001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+		for (int i = 0; i < TRIAL_COUNT; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			w = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			u = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			v = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			result = noise.singleSimplex((int)state, x, y, z, w, u, v);
-			min = Math.min(min, result);
-			max = Math.max(max, result);
-			if(result > 1f)
-				higher++;
-			if(result < -1f)
-				lower++;
+			if(result == (min = Math.min(min, result)))
+			{
+				xLo = x; yLo = y; zLo = z; wLo = w; uLo = u; vLo = v;
+			}
+			if(result == (max = Math.max(max, result)))
+			{
+				xHi = x; yHi = y; zHi = z; wHi = w; uHi = u; vHi = v;
+			}
 		}
-		System.out.println("6D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("Preliminary 6D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
+		for (float e = -0.5f; e <= 0.5f; e += 0x1p-3f) {
+			for (float f = -0.5f; f <= 0.5f; f += 0x1p-3f) {
+				for (float g = -0.5f; g <= 0.5f; g += 0x1p-3f) {
+					for (float h = -0.5f; h <= 0.5f; h += 0x1p-3f) {
+						for (float i = -0.5f; i <= 0.5f; i += 0x1p-3f) {
+							for (float j = -0.5f; j <= 0.5f; j += 0x1p-3f) {
+								min = Math.min(min, noise.singleSimplex((int)state, xLo + g, yLo + h, zLo + i, wLo + j, uLo + e, vLo + f));
+								max = Math.max(max, noise.singleSimplex((int)state, xHi + g, yHi + h, zHi + i, wHi + j, uHi + e, vHi + f));
+							}
+						}
+					}
+				}
+			}
+		}
+		System.out.println("Better 6D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -123,7 +195,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("Billow 2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("Billow 2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -147,7 +219,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("FBM 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("FBM 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -172,7 +244,7 @@ public class NoiseTests {
 			if (result < -1f)
 				lower++;
 		}
-		System.out.println("FBM 4D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("FBM 4D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -196,7 +268,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("Billow 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("Billow 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -219,7 +291,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("BillowInverse 2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("BillowInverse 2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -243,7 +315,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("BillowInverse 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("BillowInverse 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 	
 	@Test
@@ -251,11 +323,11 @@ public class NoiseTests {
 	{
 		Noise noise = new Noise(543212345, 3.14159265f, Noise.SIMPLEX_FRACTAL, 3, 2f, 0.5f);
 		noise.setFractalType(Noise.RIDGED_MULTI);
-		long state = 12345678L;
+		long state = 12345678901L;
 		float x, y, result;
 		float min = 0.5f, max = 0.5f;
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 100000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			result = noise.getNoiseWithSeed(x, y, (int)state);
@@ -266,7 +338,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("Ridged 2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("Ridged 2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -274,12 +346,12 @@ public class NoiseTests {
 	{
 		Noise noise = new Noise(543212345, 3.14159265f, Noise.SIMPLEX_FRACTAL, 3, 2f, 0.5f);
 		noise.setFractalType(Noise.RIDGED_MULTI);
-		long state = 12345678L;
+		long state = 12345678901L;
 		float x, y, z, result;
 		float min, max;
 		min = max = noise.getNoiseWithSeed(0, 0, 0, (int)state);
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
@@ -291,7 +363,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("Ridged 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("Ridged 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -314,7 +386,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("RidgedInverse 2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("RidgedInverse 2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -339,7 +411,7 @@ public class NoiseTests {
 			if(result < -1f)
 				lower++;
 		}
-		System.out.println("RidgedInverse 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
+		System.out.println("RidgedInverse 3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
 	}
 
 	@Test
@@ -400,11 +472,10 @@ public class NoiseTests {
 	public void testRangePerlin4D()
 	{
 		Noise noise = new Noise(543212345, 1f, Noise.PERLIN);
-		long state = 123456L;
+		long state = 12345678901L;
 		float x, y, z, w, result, xLo=0, yLo=0, zLo=0, wLo=0, xHi=0, yHi=0, zHi=0, wHi=0;
 		float min = 0.5f, max = 0.5f;
-//		int higher = 0, lower = 0;
-		for (int i = 0; i < 200000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
@@ -418,10 +489,6 @@ public class NoiseTests {
 			{
 				xHi = x; yHi = y; zHi = z; wHi = w;
 			}
-//			if(result > 1f)
-//				higher++;
-//			if(result < -1f)
-//				lower++;
 		}
 		System.out.println("Preliminary 4D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
 		for (float g = -0.5f; g <= 0.5f; g += 0x1p-6f) {
@@ -434,20 +501,17 @@ public class NoiseTests {
 				}
 			}
 		}
-		//4D min=-1.7437704,max=1.8121637,multiplier=0.55182654
 		System.out.println("Better 4D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
-//		System.out.println("4D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
 	}
 
 	@Test
 	public void testRangePerlin5D()
 	{
 		Noise noise = new Noise(543212345, 1f, Noise.PERLIN);
-		long state = 123456789L;
+		long state = 12345678901L;
 		float x, y, z, w, u, result, xLo=0, yLo=0, zLo=0, wLo=0, uLo=0, xHi=0, yHi=0, zHi=0, wHi=0, uHi=0;
 		float min = 0.5f, max = 0.5f;
-//		int higher = 0, lower = 0;
-		for (int i = 0; i < 30000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
@@ -462,21 +526,15 @@ public class NoiseTests {
 			{
 				xHi = x; yHi = y; zHi = z; wHi = w; uHi = u;
 			}
-//			if(result > 1f)
-//				higher++;
-//			if(result < -1f)
-//				lower++;
 		}
 		System.out.println("Preliminary 5D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
 		for (float e = -0.5f; e <= 0.5f; e += 0x1p-3f) {
-			for (float f = -0.5f; f <= 0.5f; f += 0x1p-3f) {
-				for (float g = -0.5f; g <= 0.5f; g += 0x1p-3f) {
-					for (float h = -0.5f; h <= 0.5f; h += 0x1p-3f) {
-						for (float i = -0.5f; i <= 0.5f; i += 0x1p-3f) {
-							for (float j = -0.5f; j <= 0.5f; j += 0x1p-3f) {
-								min = Math.min(min, noise.singlePerlin((int)state, xLo + g, yLo + h, zLo + i, wLo + j, uLo + e));
-								max = Math.max(max, noise.singlePerlin((int)state, xHi + g, yHi + h, zHi + i, wHi + j, uHi + e));
-							}
+			for (float g = -0.5f; g <= 0.5f; g += 0x1p-3f) {
+				for (float h = -0.5f; h <= 0.5f; h += 0x1p-3f) {
+					for (float i = -0.5f; i <= 0.5f; i += 0x1p-3f) {
+						for (float j = -0.5f; j <= 0.5f; j += 0x1p-3f) {
+							min = Math.min(min, noise.singlePerlin((int)state, xLo + g, yLo + h, zLo + i, wLo + j, uLo + e));
+							max = Math.max(max, noise.singlePerlin((int)state, xHi + g, yHi + h, zHi + i, wHi + j, uHi + e));
 						}
 					}
 				}
@@ -489,11 +547,10 @@ public class NoiseTests {
 	public void testRangePerlin6D()
 	{
 		Noise noise = new Noise(543212345, 1f, Noise.PERLIN);
-		long state = 12L;
+		long state = 12345678901L;
 		float x, y, z, w, u, v, result, xLo=0, yLo=0, zLo=0, wLo=0, uLo=0, vLo=0, xHi=0, yHi=0, zHi=0, wHi=0, uHi=0, vHi=0;
 		float min = 0.5f, max = 0.5f;
-//		int higher = 0, lower = 0;
-		for (int i = 0; i < 3000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
@@ -509,10 +566,6 @@ public class NoiseTests {
 			{
 				xHi = x; yHi = y; zHi = z; wHi = w; uHi = u; vHi = v;
 			}
-//			if(result > 1f)
-//				higher++;
-//			if(result < -1f)
-//				lower++;
 		}
 		System.out.println("Preliminary 6D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
 		for (float e = -0.5f; e <= 0.5f; e += 0x1p-3f) {
