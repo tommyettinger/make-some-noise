@@ -440,6 +440,52 @@ public class NoiseTests {
 	}
 
 	@Test
+	public void testRangePerlin5D()
+	{
+		Noise noise = new Noise(543212345, 1f, Noise.PERLIN);
+		long state = 123456789L;
+		float x, y, z, w, u, result, xLo=0, yLo=0, zLo=0, wLo=0, uLo=0, xHi=0, yHi=0, zHi=0, wHi=0, uHi=0;
+		float min = 0.5f, max = 0.5f;
+//		int higher = 0, lower = 0;
+		for (int i = 0; i < 30000000; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			w = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			u = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			result = noise.singlePerlin((int)state, x, y, z, w, u);
+			if(result == (min = Math.min(min, result)))
+			{
+				xLo = x; yLo = y; zLo = z; wLo = w; uLo = u;
+			}
+			if(result == (max = Math.max(max, result)))
+			{
+				xHi = x; yHi = y; zHi = z; wHi = w; uHi = u;
+			}
+//			if(result > 1f)
+//				higher++;
+//			if(result < -1f)
+//				lower++;
+		}
+		System.out.println("Preliminary 5D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
+		for (float e = -0.5f; e <= 0.5f; e += 0x1p-3f) {
+			for (float f = -0.5f; f <= 0.5f; f += 0x1p-3f) {
+				for (float g = -0.5f; g <= 0.5f; g += 0x1p-3f) {
+					for (float h = -0.5f; h <= 0.5f; h += 0x1p-3f) {
+						for (float i = -0.5f; i <= 0.5f; i += 0x1p-3f) {
+							for (float j = -0.5f; j <= 0.5f; j += 0x1p-3f) {
+								min = Math.min(min, noise.singlePerlin((int)state, xLo + g, yLo + h, zLo + i, wLo + j, uLo + e));
+								max = Math.max(max, noise.singlePerlin((int)state, xHi + g, yHi + h, zHi + i, wHi + j, uHi + e));
+							}
+						}
+					}
+				}
+			}
+		}
+		System.out.println("Better 5D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
+	}
+
+	@Test
 	public void testRangePerlin6D()
 	{
 		Noise noise = new Noise(543212345, 1f, Noise.PERLIN);
@@ -483,9 +529,6 @@ public class NoiseTests {
 				}
 			}
 		}
-		//Better 6D min=-0.94192255,max=0.99394155,multiplier=1.0060954
 		System.out.println("Better 6D min="+min+",max="+max+",multiplier="+(1f/Math.max(-min, max)));
-//		System.out.println("4D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower);
 	}
-
 }

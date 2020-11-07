@@ -11,7 +11,7 @@
 
     <name>make_some_noise</name>
 
-    <description>Continuous noise functions in 2D, 3D, 4D, and 6D</description>
+    <description>Continuous noise functions in 2D, 3D, 4D, 5D, and 6D</description>
 
     <url>https://github.com/tommyettinger/make-some-noise</url>
 
@@ -49,13 +49,15 @@
     </distributionManagement>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.version>3.8.0</maven.compiler.version>
-        <maven.javadoc.version>3.0.1</maven.javadoc.version>
-        <maven.resources.version>3.1.0</maven.resources.version>
-        <maven.source.version>3.0.1</maven.source.version>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.version>3.8.1</maven.compiler.version>
+        <maven.javadoc.version>3.2.0</maven.javadoc.version>
+        <maven.resources.version>3.2.0</maven.resources.version>
+        <maven.source.version>3.2.1</maven.source.version>
         <maven.gpg.version>1.6</maven.gpg.version>
         <jdk.version>1.7</jdk.version>
-        <junit.version>4.11</junit.version>
+        <releaseVersion>7</releaseVersion>
+        <junit.version>4.13.1</junit.version>
         <gdx.version>1.9.10</gdx.version>
     </properties>
 
@@ -131,7 +133,26 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>releaseLow</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>${maven.compiler.version}</version>
+                        <configuration>
+                            <release>${releaseVersion}</release>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -142,7 +163,7 @@
                     <source>${jdk.version}</source>
                     <target>${jdk.version}</target>
                     <excludes>
-                        <exclude>**/other/*.java</exclude>
+                        <exclude>/other/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -196,40 +217,38 @@
                     <windowtitle>${project.name} ${project.version}</windowtitle>
                     <splitindex>true</splitindex>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                    <javadocVersion>${jdk.version}</javadocVersion>
-                    <links>
-                        <link>http://docs.oracle.com/javase/7/docs/api/</link>
-                        <link>http://docs.oracle.com/javase/6/docs/api/</link>
-                        <link>http://docs.oracle.com/javase/1.5.0/docs/api/</link>
-                    </links>
+                    <source>8</source>
+                    <javadocVersion>14</javadocVersion>
                     <linksource>true</linksource>
-                    <detectOfflineLinks>true</detectOfflineLinks>
+                    <detectLinks>false</detectLinks>
+                    <detectJavaApiLink>false</detectJavaApiLink>
+                    <detectOfflineLinks>false</detectOfflineLinks>
                     <doclint>none</doclint>
-                    <excludePackageNames>make.some.noise.other</excludePackageNames>
+                    <javadocExecutable>${env.JAVA_HOME}/bin/javadoc</javadocExecutable>
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>make.some.noise.NoiseDemo</mainClass>
-                                </transformer>
-                            </transformers>
-                            <minimizeJar>true</minimizeJar>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-shade-plugin</artifactId>-->
+<!--                <version>3.1.1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>shade</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <transformers>-->
+<!--                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+<!--                                    <mainClass>make.some.noise.NoiseDemo</mainClass>-->
+<!--                                </transformer>-->
+<!--                            </transformers>-->
+<!--                            <minimizeJar>true</minimizeJar>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 

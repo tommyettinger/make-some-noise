@@ -27,7 +27,7 @@
 // off every 'zix'.)
 //
 
-package make.some.noise.other;
+package make.some.noise;
 
 import java.io.Serializable;
 
