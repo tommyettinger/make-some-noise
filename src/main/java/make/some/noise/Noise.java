@@ -4501,7 +4501,7 @@ public class Noise implements Serializable {
             }
             skewOffset += G6;
         }
-        return 8.1f * n;
+        return 7.5f * n;
 
     }
 

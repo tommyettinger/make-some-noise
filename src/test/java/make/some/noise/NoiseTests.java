@@ -8,51 +8,72 @@ import org.junit.Test;
  */
 public class NoiseTests {
 
-	public static final int TRIAL_COUNT = 9000000;
+	public static final int TRIAL_COUNT = 500000000;
 	
 	@Test
 	public void testRange2D()
 	{
-		Noise noise = new Noise(543212345, 3.14159265f);
-		long state = 12345678L;
-		float x, y, result;
+		Noise noise = new Noise(543212345, 1f, Noise.SIMPLEX);
+		long state = 12345678901L;
+		float x, y, result, xLo = 0, yLo = 0, xHi = 0, yHi = 0;
 		float min = 0.5f, max = 0.5f;
-		int higher = 0, lower = 0;
-		for (int i = 0; i < 100000000; i++) {
-			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+		for (int i = 0; i < TRIAL_COUNT; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			result = noise.singleSimplex((int)state, x, y);
-			min = Math.min(min, result);
-			max = Math.max(max, result);
-			if(result > 1f)
-				higher++;
-			if(result < -1f)
-				lower++;
+			if (result == (min = Math.min(min, result))) {
+				xLo = x;
+				yLo = y;
+			}
+			if (result == (max = Math.max(max, result))) {
+				xHi = x;
+				yHi = y;
+			}
 		}
-		System.out.println("2D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
+		System.out.println("Preliminary 2D min=" + min + ",max=" + max + ",multiplier=" + (1f / Math.max(-min, max)));
+		for (float g = -0.5f; g <= 0.5f; g += 0x1p-3f) {
+			for (float h = -0.5f; h <= 0.5f; h += 0x1p-3f) {
+				min = Math.min(min, noise.singleSimplex((int)state, xLo + g, yLo + h));
+				max = Math.max(max, noise.singleSimplex((int)state, xHi + g, yHi + h));
+			}
+		}
+		System.out.println("Better 2D min=" + min + ",max=" + max + ",multiplier=" + (1f / Math.max(-min, max)));
 	}
 
 	@Test
 	public void testRange3D()
 	{
-		Noise noise = new Noise(543212345, 3.14159265f);
-		long state = 12345678L;
-		float x, y, z, result;
+		Noise noise = new Noise(543212345, 1f, Noise.SIMPLEX);
+		long state = 12345678901L;
+		float x, y, z, result, xLo = 0, yLo = 0, zLo = 0, xHi = 0, yHi = 0, zHi = 0;
 		float min = 0.5f, max = 0.5f;
-		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
-			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
-			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
+		for (int i = 0; i < TRIAL_COUNT; i++) {
+			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
+			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			result = noise.singleSimplex((int)state, x, y, z);
-			min = Math.min(min, result);
-			max = Math.max(max, result);
-			if(result > 1f)
-				higher++;
-			if(result < -1f)
-				lower++;
+			if (result == (min = Math.min(min, result))) {
+				xLo = x;
+				yLo = y;
+				zLo = z;
+			}
+			if (result == (max = Math.max(max, result))) {
+				xHi = x;
+				yHi = y;
+				zHi = z;
+			}
 		}
-		System.out.println("3D min="+min+",max="+max+",tooHighCount="+higher+",tooLowCount="+lower+",multiplier="+(1f/Math.max(-min, max)));
+		System.out.println("Preliminary 3D min=" + min + ",max=" + max + ",multiplier=" + (1f / Math.max(-min, max)));
+		for (float g = -0.5f; g <= 0.5f; g += 0x1p-3f) {
+			for (float h = -0.5f; h <= 0.5f; h += 0x1p-3f) {
+				for (float i = -0.5f; i <= 0.5f; i += 0x1p-3f) {
+					min = Math.min(min, noise.singleSimplex((int)state, xLo + g, yLo + h, zLo + i));
+					max = Math.max(max, noise.singleSimplex((int)state, xHi + g, yHi + h, zHi + i));
+				}
+
+			}
+		}
+		System.out.println("Better 3D min=" + min + ",max=" + max + ",multiplier=" + (1f / Math.max(-min, max)));
 	}
 
 	@Test
@@ -184,7 +205,7 @@ public class NoiseTests {
 		float x, y, result;
 		float min = 0.5f, max = 0.5f;
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 100000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			result = noise.getNoiseWithSeed(x, y, (int)state);
@@ -207,7 +228,7 @@ public class NoiseTests {
 		float x, y, z, result;
 		float min = 0.5f, max = 0.5f;
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
@@ -231,7 +252,7 @@ public class NoiseTests {
 		float x, y, z, w, result;
 		float min = 0.5f, max = 0.5f;
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (8.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-21f));
 			y = (state >> 58) / (8.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-21f));
 			z = (state >> 58) / (8.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-21f));
@@ -256,7 +277,7 @@ public class NoiseTests {
 		float x, y, z, result;
 		float min = 0.5f, max = 0.5f;
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
@@ -280,7 +301,7 @@ public class NoiseTests {
 		float x, y, result;
 		float min = 0.5f, max = 0.5f;
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 100000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			result = noise.getNoiseWithSeed(x, y, (int)state);
@@ -303,7 +324,7 @@ public class NoiseTests {
 		float x, y, z, result;
 		float min = 0.5f, max = 0.5f;
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
@@ -375,7 +396,7 @@ public class NoiseTests {
 		float x, y, result;
 		float min = 0.5f, max = 0.5f;
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 100000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			result = noise.getNoiseWithSeed(x, y, (int)state);
@@ -399,7 +420,7 @@ public class NoiseTests {
 		float min, max;
 		min = max = noise.getNoiseWithSeed(0, 0, 0, (int)state);
 		int higher = 0, lower = 0;
-		for (int i = 0; i < 10000000; i++) {
+		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
 			z = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L & 0xffffffL) * 0x1p-24f));
