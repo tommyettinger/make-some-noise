@@ -3,8 +3,8 @@ package make.some.noise;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
@@ -280,13 +280,12 @@ public class CellularNoiseVisualizer extends ApplicationAdapter {
     }
 
     public static void main(String[] arg) {
-        LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-        config.title = "Make Some Noise";
-        config.width = width;
-        config.height = height;
-        config.foregroundFPS = 0;
-        config.vSyncEnabled = false;
-        config.resizable = false;
-        new LwjglApplication(new CellularNoiseVisualizer(), config);
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setTitle("Make Some Noise");
+        config.setWindowedMode(width, height);
+        config.setForegroundFPS(0);
+        config.useVsync(false);
+        config.setResizable(false);
+        new Lwjgl3Application(new CellularNoiseVisualizer(), config);
     }
 }

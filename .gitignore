@@ -225,9 +225,6 @@ target/
 .idea/
 .settings/
 
-*.jar
-
-
 # jEdit garbage
 *~
 *#*#
