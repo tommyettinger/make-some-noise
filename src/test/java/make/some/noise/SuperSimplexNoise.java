@@ -49,8 +49,8 @@ public class SuperSimplexNoise {
 			if (r < 0)
 				r += (i + 1);
 			perm[i] = source[r];
-			permGrad2[i] = GRADIENTS_2D[perm[i]];
-			permGrad3[i] = GRADIENTS_3D[perm[i]];
+			permGrad2[i] = GRADIENTS_2D[perm[i] %GRADIENTS_2D.length];
+			permGrad3[i] = GRADIENTS_3D[perm[i] %GRADIENTS_3D.length];
 			source[r] = source[i];
 		}
 	}
