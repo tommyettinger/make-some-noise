@@ -25,7 +25,7 @@ public class NoiseDemo extends ApplicationAdapter {
     private ImmediateModeRenderer20 renderer;
     private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX_FRACTAL, 3);
 
-    private static final int width = 256, height = 256;
+    private static final int width = 384, height = 384;
 
     private InputAdapter input;
 
