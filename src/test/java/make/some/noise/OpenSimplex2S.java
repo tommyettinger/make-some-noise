@@ -7,6 +7,7 @@ import java.util.Set;
 
 /**
  * K.jpg's OpenSimplex 2, smooth variant ("SuperSimplex")
+ * With area generators for 2D and 3D.
  * <br>
  * Using OpenSimplex 2 in its July 5, 2020 revision. This is the latest
  * revision as of February 26, 2021.

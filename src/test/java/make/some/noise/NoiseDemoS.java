@@ -1,6 +1,6 @@
-package make.some.noise;/*
- * Noise Demo 2D.
- * Replace SuperSimplexNoise with FastSimplexStyleNoise to test FastSimplexStyleNoise instead.
+package make.some.noise;
+/*
+ * Noise Demo 2D for OpenSimplex2S.
  */
 
 import javax.imageio.ImageIO;
@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class NoiseDemo3
+public class NoiseDemoS
 {
 	private static final int WIDTH = 1024;
 	private static final int HEIGHT = 1024;

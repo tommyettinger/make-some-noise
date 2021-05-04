@@ -1,5 +1,6 @@
-package make.some.noise;/*
- * Noise Demo 2D for (older) SuperSimplexNoise.
+package make.some.noise;
+/*
+ * Noise Demo 2D for OpenSimplex2F.
  */
 
 import javax.imageio.ImageIO;
@@ -8,7 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class NoiseDemo2
+public class NoiseDemoF
 {
 	private static final int WIDTH = 1024;
 	private static final int HEIGHT = 1024;
@@ -29,11 +30,12 @@ public class NoiseDemo2
 			throws IOException {
 		
 		// Initialize
-		SuperSimplexNoise noise = new SuperSimplexNoise(1234);
-		SuperSimplexNoise.GenerateContext2D noiseBulk = new SuperSimplexNoise.GenerateContext2D(FREQ, FREQ, 1.0f);
+		OpenSimplex2F noise = new OpenSimplex2F(1234);
+		OpenSimplex2F.GenerateContext2D noiseBulk = new OpenSimplex2F.GenerateContext2D(
+				OpenSimplex2F.LatticeOrientation2D.Standard, FREQ, FREQ, 1.0f);
 		
 		// Generate
-		float[][] buffer = new float[HEIGHT][WIDTH];
+		double[][] buffer = new double[HEIGHT][WIDTH];
 		if (generateType != GenerateType.Evaluator) noise.generate2(noiseBulk, buffer, OFF_X, OFF_Y);
 		
 		// Image
@@ -42,8 +44,8 @@ public class NoiseDemo2
 		{
 			for (int x = 0; x < WIDTH; x++)
 			{
-				float value = buffer[y][x];
-				float evalValue = 0;
+				double value = buffer[y][x];
+				double evalValue = 0;
 				
 				if (generateType != GenerateType.AreaGenerator)
 					evalValue = noise.noise2((x + OFF_X) * FREQ, (y + OFF_Y) * FREQ);;

@@ -18,7 +18,7 @@ import static com.badlogic.gdx.graphics.GL20.GL_POINTS;
  */
 public class NoiseDemo extends ApplicationAdapter {
 
-    private int dim = 0; // this can be 0, 1, 2, or 3; these correspond to 2D, 3D, 4D, and 6D
+    private int dim = 0; // this can be 0, 1, 2, 3, or 4; these correspond to 2D, 3D, 4D, 5D, and 6D
     private int octaves = 2;
     private float freq = 0.125f, speed = 1f/6f;
     private boolean inverse = false;
