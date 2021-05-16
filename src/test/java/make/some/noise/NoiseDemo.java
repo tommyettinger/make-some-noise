@@ -202,7 +202,7 @@ public class NoiseDemo extends ApplicationAdapter {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("Make Some Noise");
         config.setWindowedMode(width, height);
-        config.setForegroundFPS(60);
+        config.setForegroundFPS(120);
         config.useVsync(true);
         config.setResizable(false);
         new Lwjgl3Application(new NoiseDemo(), config);
