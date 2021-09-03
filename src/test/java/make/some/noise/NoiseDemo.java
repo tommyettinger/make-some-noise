@@ -64,14 +64,17 @@ public class NoiseDemo extends ApplicationAdapter {
                     case S: //seed
                         noise.setSeed(noise.getSeed() + 1);
                         break;
-                    case N: // noise type
+                    case N: //noise type
                     case EQUALS:
+                    case PLUS:
+                    case NUMPAD_ADD:
                     case ENTER:
-                        noise.setNoiseType((noise.getNoiseType() + 1) % 14);
+                        noise.setNoiseType((noise.getNoiseType() + 1) & 15);
                         break;
-                    case M:
+                    case B: //back one noise type
                     case MINUS:
-                        noise.setNoiseType((noise.getNoiseType() + 13) % 14);
+                    case NUMPAD_SUBTRACT:
+                        noise.setNoiseType((noise.getNoiseType() + 15) & 15);
                         break;
                     case D: //dimension
                         dim = (dim + 1) % 5;
@@ -90,7 +93,8 @@ public class NoiseDemo extends ApplicationAdapter {
                         noise.setFractalOctaves((octaves = octaves + 7 & 7) + 1);
                         break;
                     case I: // inverse mode
-                        if (inverse = !inverse) {
+                        inverse = !inverse;
+                        if (inverse) {
                             noise.setFractalLacunarity(0.5f);
                             noise.setFractalGain(2f);
                         } else {
@@ -101,7 +105,23 @@ public class NoiseDemo extends ApplicationAdapter {
                     case K: // sKip
                         ctr += 1000;
                         break;
-                    case Q:
+
+                    case COMMA: //< decrease foam sharpness
+                        noise.setFoamSharpness(Math.max(0.0f, noise.getFoamSharpness() - 0.0625f));
+                        break;
+                    case PERIOD: //> increase foam sharpness
+                        noise.setFoamSharpness(noise.getFoamSharpness() + 0.0625f);
+                        break;
+                    case LEFT_BRACKET: //lower mutation
+                        noise.setNoiseType(noise.getNoiseType() | 14); // sets noise type to MUTANT or MUTANT_FRACTAL
+                        noise.setMutation(noise.getMutation() - 0.0625f);
+                        break;
+                    case RIGHT_BRACKET: //raise mutation
+                        noise.setNoiseType(noise.getNoiseType() | 14); // sets noise type to MUTANT or MUTANT_FRACTAL
+                        noise.setMutation(noise.getMutation() + 0.0625f);
+                        break;
+
+                    case Q: //quit
                     case ESCAPE: {
                         Gdx.app.exit();
                     }
