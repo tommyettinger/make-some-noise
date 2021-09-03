@@ -14,16 +14,21 @@ For Maven,
 <dependency>
   <groupId>com.github.tommyettinger</groupId>
   <artifactId>make_some_noise</artifactId>
-  <version>0.2</version>
+  <version>0.3</version>
 </dependency>
 ```
 
 or for Gradle,
 
 ```groovy
-implementation "com.github.tommyettinger:make_some_noise:0.2"
+implementation "com.github.tommyettinger:make_some_noise:0.3"
 ```
 (You may need to change `implementation` to `api` or the older `compile` for some projects.)
+
+This library is GWT-compatible; if you use this with GWT, add the following to your .gwt.xml file:
+```xml
+<inherits name='make.some.noise' />
+```
 
 ## But What Can It Do?
 
@@ -45,9 +50,9 @@ types should stay in that range.
 
 ## Is Anything... Different?
 
-Yes, some types of noise are new here. The `FOAM` and `HONEY` types of noise weren't part of
-FastNoise (nor were their fractal variants). `FOAM` works by making several calls to value
-noise with differently rotated grids, and with the results of earlier calls domain-warping
+Yes, some types of noise are new here. The `FOAM`, `HONEY`, and `MUTANT` types of noise weren't
+part of FastNoise (nor were their fractal variants). `FOAM` works by making several calls to
+value noise with differently rotated grids, and with the results of earlier calls domain-warping
 the inputs to later calls; these value noise results are averaged, and the result is pushed
 towards less-centrally-biased values using a configurable spline. The combination of
 differently-rotated grids is very good at eliminating the square-grid artifacts of value
@@ -56,7 +61,12 @@ and a value noise call (which uses a square grid), then pushing the values away 
 central bias (which would normally be caused by the averaging). This also tends to break up
 the honeycomb patterns in its sources, and is faster than `FOAM`. `HONEY` is useful when you
 want the smooth shapes of `SIMPLEX`, but also want to permit larger areas to be all-high or
-all-low (`SIMPLEX` always has a low area near each high area with one octave).
+all-low (`SIMPLEX` always has a low area near each high area with one octave). `MUTANT` is
+just like `FOAM` with an extra dimension, so 2D `MUTANT` noise looks like a slice of 3D `FOAM`
+noise. You can configure this extra value using `setMutation()`; this is similar to changing
+the seed, but small changes to the mutation result in only small changes to the shape of the
+noise (this is unlike small changes to the seed, where any changes make very different noise).
+Of course, this is not without a tradeoff; `MUTANT` noise is the slowest here.
 
 ## Previews of Noise Types
 
@@ -90,6 +100,10 @@ All are 2D. FRACTAL types use 3 octaves.
   - ![Preview](https://i.imgur.com/fKLiF8S.png)
 - HONEY_FRACTAL:
   - ![Preview](https://i.imgur.com/aRw2jLJ.png)
+- MUTANT:
+  - ![Preview](https://i.imgur.com/HKIiTBd.png)
+- MUTANT_FRACTAL:
+  - ![Preview](https://i.imgur.com/a68oG3B.png)
 
 
 ## Some Fractal Type Previews
@@ -124,3 +138,10 @@ All are 2D, using 3 octaves.
      - ![Preview](https://i.imgur.com/OyRumgu.png)
   - RIDGED_MULTI
      - ![Preview](https://i.imgur.com/Gtlhg0J.png)
+- MUTANT_FRACTAL:
+  - FBM
+    - ![Preview](https://i.imgur.com/a68oG3B.png)
+  - BILLOW
+    - ![Preview](https://i.imgur.com/idZQYFe.png)
+  - RIDGED_MULTI
+    - ![Preview](https://i.imgur.com/5r6gXvk.png)

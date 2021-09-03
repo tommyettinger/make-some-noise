@@ -6,7 +6,7 @@
 
     <groupId>com.github.tommyettinger</groupId>
     <artifactId>make_some_noise</artifactId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.3</version>
 
 
     <name>make_some_noise</name>
@@ -57,7 +57,7 @@
         <maven.gpg.version>1.6</maven.gpg.version>
         <jdk.version>1.7</jdk.version>
         <releaseVersion>7</releaseVersion>
-        <junit.version>4.13.1</junit.version>
+        <junit.version>4.13.2</junit.version>
         <gdx.version>1.10.0</gdx.version>
     </properties>
 
@@ -248,6 +248,21 @@
 <!--                                    <mainClass>make.some.noise.NoiseDemo</mainClass>-->
 <!--                                </transformer>-->
 <!--                            </transformers>-->
+<!--                            &lt;!&ndash; These filters remove dependencies on sound libraries; this doesn't use them. &ndash;&gt;-->
+<!--                            <filters>-->
+<!--                                <filter>-->
+<!--                                    <artifact>org.jcraft:jorbis</artifact>-->
+<!--                                    <excludes>-->
+<!--                                        <exclude>**</exclude>-->
+<!--                                    </excludes>-->
+<!--                                </filter>-->
+<!--                                <filter>-->
+<!--                                    <artifact>org.lwjgl:lwjgl-openal</artifact>-->
+<!--                                    <excludes>-->
+<!--                                        <exclude>**</exclude>-->
+<!--                                    </excludes>-->
+<!--                                </filter>-->
+<!--                            </filters>-->
 <!--                            <outputFile>target/make_some_noise_demo.jar</outputFile>-->
 <!--                            <minimizeJar>true</minimizeJar>-->
 <!--                        </configuration>-->

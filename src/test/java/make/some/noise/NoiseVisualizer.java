@@ -49,8 +49,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
     @Override
     public void create() {
         startTime = TimeUtils.millis();
-        // not sure if this is always needed...
-        //Gdx.gl.glDisable(GL20.GL_BLEND);
+
         renderer = new ImmediateModeRenderer20(width * height, false, true, 0);
         view = new ScreenViewport();
         
@@ -61,9 +60,9 @@ public class NoiseVisualizer extends ApplicationAdapter {
             public boolean keyUp(int keycode) {
                 switch (keycode) {
                     case MINUS:
-                    case M:
+                    case B:
 //                        if(dim <= 3)
-                        noise.setNoiseType((noise.getNoiseType() + 11) % 12);
+                        noise.setNoiseType((noise.getNoiseType() + 15) & 15);
 //                        else
 //                            noise.setNoiseType((noise.getNoiseType() + 9) % 10);
                         red.setNoiseType(noise.getNoiseType());
@@ -74,7 +73,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     case PLUS:
                     case N: // noise type
 //                        if(dim <= 3) 
-                        noise.setNoiseType((noise.getNoiseType() + 1) % 12);
+                        noise.setNoiseType((noise.getNoiseType() + 1) & 15);
 //                        else
 //                            noise.setNoiseType((noise.getNoiseType() + 1) % 10);
                         red.setNoiseType(noise.getNoiseType());
@@ -355,6 +354,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
         config.setForegroundFPS(0);
         config.useVsync(false);
         config.setResizable(false);
+        config.disableAudio(true);
         new Lwjgl3Application(new NoiseVisualizer(), config);
     }
 }

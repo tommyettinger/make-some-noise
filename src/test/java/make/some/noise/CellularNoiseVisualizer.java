@@ -286,6 +286,7 @@ public class CellularNoiseVisualizer extends ApplicationAdapter {
         config.setForegroundFPS(0);
         config.useVsync(false);
         config.setResizable(false);
+        config.disableAudio(true);
         new Lwjgl3Application(new CellularNoiseVisualizer(), config);
     }
 }

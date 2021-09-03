@@ -225,6 +225,7 @@ public class NoiseDemo extends ApplicationAdapter {
         config.setForegroundFPS(120);
         config.useVsync(true);
         config.setResizable(false);
+        config.disableAudio(true);
         new Lwjgl3Application(new NoiseDemo(), config);
     }
 }
