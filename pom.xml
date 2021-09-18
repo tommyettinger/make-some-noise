@@ -88,7 +88,12 @@
             <classifier>natives-desktop</classifier>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.github.tommyettinger</groupId>
+            <artifactId>anim8-gdx</artifactId>
+            <version>0.2.11</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <issueManagement>

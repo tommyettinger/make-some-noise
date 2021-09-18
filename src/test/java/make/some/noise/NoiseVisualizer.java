@@ -7,11 +7,15 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.github.tommyettinger.anim8.AnimatedPNG;
 
 import static com.badlogic.gdx.Input.Keys.*;
 import static com.badlogic.gdx.graphics.GL20.GL_POINTS;
@@ -22,7 +26,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 
     private int dim = 0; // this can be 0, 1, 2, or 3; these correspond to 2D, 3D, 4D, and 6D
     private int octaves = 2;
-    private float freq = 0.125f, speed = 1f/6f;
+    private float freq = 0.0625f, speed = 1f/6f;
     private boolean inverse = false;
     private ImmediateModeRenderer20 renderer;
     private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX_FRACTAL, 3);
@@ -41,6 +45,9 @@ public class NoiseVisualizer extends ApplicationAdapter {
     private long startTime;
     private boolean keepGoing = true;
 
+    private AnimatedPNG apng;
+    private Array<Pixmap> frames = new Array<>(128);
+
     public static float basicPrepare(float n)
     {
         return n * 0.5f + 0.5f;
@@ -50,6 +57,8 @@ public class NoiseVisualizer extends ApplicationAdapter {
     public void create() {
         startTime = TimeUtils.millis();
 
+        apng = new AnimatedPNG();
+        apng.setCompression(2);
         renderer = new ImmediateModeRenderer20(width * height, false, true, 0);
         view = new ScreenViewport();
         
@@ -112,7 +121,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         dim = (dim + 1) & 3;
                         break;
                     case F: // frequency
-                        noise.setFrequency(Noise.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.05f + 0.07f);
+                        noise.setFrequency(MathUtils.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.05f + 0.07f);
                         red.setFrequency(noise.getFrequency());
                         green.setFrequency(noise.getFrequency());
                         blue.setFrequency(noise.getFrequency());
@@ -169,6 +178,37 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         noise.setFoamSharpness(MathUtils.sinDeg((System.currentTimeMillis() & 0xFFFF) * 0x1p-4f) + 1.25f);
                         System.out.println(noise.getFoamSharpness());
                         break;
+                    case W: //Write
+                        if(dim == 0){
+                            Pixmap p = new Pixmap(256, 256, Pixmap.Format.RGBA8888);
+                            for (int x = 0; x < 256; x++) {
+                                for (int y = 0; y < 256; y++) {
+                                    int color = (int) ((noise.getConfiguredNoise(x, y) + 1f) * 127.999f);
+                                    p.drawPixel(x, y, color * 0x01010100 | 0xFF);
+                                }
+                            }
+                            PixmapIO.writePNG(Gdx.files.local("out/noise2D_" + System.currentTimeMillis() + ".png"), p);
+                            p.dispose();
+                        }
+                        else {
+                            for (int c = 0; c < 256; c++) {
+                                Pixmap p = new Pixmap(256, 256, Pixmap.Format.RGBA8888);
+                                for (int x = 0; x < 256; x++) {
+                                    for (int y = 0; y < 256; y++) {
+                                        int color = (int) ((noise.getConfiguredNoise(x, y, c) + 1f) * 127.999f);
+                                        p.drawPixel(x, y, color * 0x01010100 | 0xFF);
+                                    }
+                                }
+                                frames.add(p);
+                            }
+                            Gdx.files.local("out/").mkdirs();
+                            apng.write(Gdx.files.local("out/noise"+(dim+2)+"D_" + System.currentTimeMillis() + ".png"), frames, 12);
+                            for (int i = 0; i < frames.size; i++) {
+                                frames.get(i).dispose();
+                            }
+                            frames.clear();
+                        }
+                        break;
                     case Q:
                     case ESCAPE: {
                         Gdx.app.exit();
@@ -183,7 +223,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 
     private static final float WHITE = Color.WHITE_FLOAT_BITS, BLACK = Color.BLACK.toFloatBits();
     public void putMap() {
-//        noise.setFrequency(Noise.sin((TimeUtils.millis() & 0xFFFFFL) * 0x1p-12f) * 0.03125f + 0.0625f);
+//        noise.setFrequency(MathUtils.sin((TimeUtils.millis() & 0xFFFFFL) * 0x1p-12f) * 0.03125f + 0.0625f);
 //        red.setFrequency(noise.getFrequency());
 //        green.setFrequency(noise.getFrequency());
 //        blue.setFrequency(noise.getFrequency());
