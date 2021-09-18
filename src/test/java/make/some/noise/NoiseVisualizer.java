@@ -165,6 +165,10 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     case A: // Acceleration
                         speed = (1.5f + MathUtils.cosDeg(TimeUtils.timeSinceMillis(startTime))) * 0.5f;
                         break;
+                    case COMMA:
+                        noise.setFoamSharpness(MathUtils.sinDeg((System.currentTimeMillis() & 0xFFFF) * 0x1p-4f) + 1.25f);
+                        System.out.println(noise.getFoamSharpness());
+                        break;
                     case Q:
                     case ESCAPE: {
                         Gdx.app.exit();
