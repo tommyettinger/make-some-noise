@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.utils.UIUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -26,7 +27,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 
     private int dim = 0; // this can be 0, 1, 2, or 3; these correspond to 2D, 3D, 4D, and 6D
     private int octaves = 2;
-    private float freq = 0.0625f, speed = 1f/6f;
+    private float freq = 0.03125f, speed = 1f/6f;
     private boolean inverse = false;
     private ImmediateModeRenderer20 renderer;
     private Noise noise = new Noise(1, 1f/32f, Noise.SIMPLEX_FRACTAL, 3);
@@ -46,7 +47,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
     private boolean keepGoing = true;
 
     private AnimatedPNG apng;
-    private Array<Pixmap> frames = new Array<>(128);
+    private Array<Pixmap> frames = new Array<>(64);
 
     public static float basicPrepare(float n)
     {
@@ -121,7 +122,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         dim = (dim + 1) & 3;
                         break;
                     case F: // frequency
-                        noise.setFrequency(MathUtils.sin((TimeUtils.timeSinceMillis(startTime) & 0xFFFFFL) * 0x1p-11f) * 0.05f + 0.07f);
+                        noise.setFrequency(noise.getFrequency() * (UIUtils.shift() ? 0.9375f : 1.0625f));
                         red.setFrequency(noise.getFrequency());
                         green.setFrequency(noise.getFrequency());
                         blue.setFrequency(noise.getFrequency());
@@ -180,9 +181,9 @@ public class NoiseVisualizer extends ApplicationAdapter {
                         break;
                     case W: //Write
                         if(dim == 0){
-                            Pixmap p = new Pixmap(256, 256, Pixmap.Format.RGBA8888);
-                            for (int x = 0; x < 256; x++) {
-                                for (int y = 0; y < 256; y++) {
+                            Pixmap p = new Pixmap(1024, 1024, Pixmap.Format.RGBA8888);
+                            for (int x = 0; x < 1024; x++) {
+                                for (int y = 0; y < 1024; y++) {
                                     int color = (int) ((noise.getConfiguredNoise(x, y) + 1f) * 127.999f);
                                     p.drawPixel(x, y, color * 0x01010100 | 0xFF);
                                 }
@@ -191,11 +192,11 @@ public class NoiseVisualizer extends ApplicationAdapter {
                             p.dispose();
                         }
                         else {
-                            for (int c = 0; c < 256; c++) {
+                            for (int c = 0; c < 64; c++) {
                                 Pixmap p = new Pixmap(256, 256, Pixmap.Format.RGBA8888);
                                 for (int x = 0; x < 256; x++) {
                                     for (int y = 0; y < 256; y++) {
-                                        int color = (int) ((noise.getConfiguredNoise(x, y, c) + 1f) * 127.999f);
+                                        int color = (int) (basicPrepare(noise.getConfiguredNoise(x, y, c)) * 255.999f);
                                         p.drawPixel(x, y, color * 0x01010100 | 0xFF);
                                     }
                                 }
@@ -223,11 +224,6 @@ public class NoiseVisualizer extends ApplicationAdapter {
 
     private static final float WHITE = Color.WHITE_FLOAT_BITS, BLACK = Color.BLACK.toFloatBits();
     public void putMap() {
-//        noise.setFrequency(MathUtils.sin((TimeUtils.millis() & 0xFFFFFL) * 0x1p-12f) * 0.03125f + 0.0625f);
-//        red.setFrequency(noise.getFrequency());
-//        green.setFrequency(noise.getFrequency());
-//        blue.setFrequency(noise.getFrequency());
-
         renderer.begin(view.getCamera().combined, GL_POINTS);
         float c = (TimeUtils.timeSinceMillis(startTime) >>> 2 & 0xFFFFFL) * (speed / (0.5f * dim * dim + 1)) + ctr;
         if(color)
