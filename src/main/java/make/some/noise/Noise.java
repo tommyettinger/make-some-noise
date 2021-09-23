@@ -1664,17 +1664,18 @@ public class Noise {
      * @return noise from 0 to 1.
      */
     protected float valueNoise (int seed, float x, float y) {
-        int xFloor = x >= 0 ? (int) x : (int) x - 1;
-        x -= xFloor;
-        x *= x * (3 - 2 * x);
-        int yFloor = y >= 0 ? (int) y : (int) y - 1;
-        y -= yFloor;
-        y *= y * (3 - 2 * y);
-        xFloor *= 0xD1B55;
-        yFloor *= 0xABC99;
-        return ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor, seed))
-            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xABC99, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor + 0xABC99, seed)))
-            * 0x1p-10f + 0.5f;
+        return singleValue(seed, x, y);
+//        int xFloor = x >= 0 ? (int) x : (int) x - 1;
+//        x -= xFloor;
+//        x *= x * (3 - 2 * x);
+//        int yFloor = y >= 0 ? (int) y : (int) y - 1;
+//        y -= yFloor;
+//        y *= y * (3 - 2 * y);
+//        xFloor *= 0xD1B55;
+//        yFloor *= 0xABC99;
+//        return ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor, seed))
+//            + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xABC99, seed) + x * hashPart1024(xFloor + 0xD1B55, yFloor + 0xABC99, seed)))
+//            * 0x1p-10f + 0.5f;
     }
     public float getValueFractal(float x, float y, float z) {
         x *= frequency;
@@ -1784,27 +1785,27 @@ public class Noise {
      */
     protected float valueNoise(int seed, float x, float y, float z)
     {
-        int xFloor = x >= 0 ? (int) x : (int) x - 1;
-        x -= xFloor;
-        x *= x * (3 - 2 * x);
-        int yFloor = y >= 0 ? (int) y : (int) y - 1;
-        y -= yFloor;
-        y *= y * (3 - 2 * y);
-        int zFloor = z >= 0 ? (int) z : (int) z - 1;
-        z -= zFloor;
-        z *= z * (3 - 2 * z);
-        //0xDB4F1, 0xBBE05, 0xA0F2F
-        xFloor *= 0xDB4F1;
-        yFloor *= 0xBBE05;
-        zFloor *= 0xA0F2F;
-        return ((1 - z) *
-            ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor, zFloor, seed))
-                + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xBBE05, zFloor, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor + 0xBBE05, zFloor, seed)))
-            + z *
-            ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor, zFloor + 0xA0F2F, seed))
-                + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed)))
-        ) * 0x1p-10f + 0.5f;
-
+        return singleValue(seed, x, y, z);
+//        int xFloor = x >= 0 ? (int) x : (int) x - 1;
+//        x -= xFloor;
+//        x *= x * (3 - 2 * x);
+//        int yFloor = y >= 0 ? (int) y : (int) y - 1;
+//        y -= yFloor;
+//        y *= y * (3 - 2 * y);
+//        int zFloor = z >= 0 ? (int) z : (int) z - 1;
+//        z -= zFloor;
+//        z *= z * (3 - 2 * z);
+//        //0xDB4F1, 0xBBE05, 0xA0F2F
+//        xFloor *= 0xDB4F1;
+//        yFloor *= 0xBBE05;
+//        zFloor *= 0xA0F2F;
+//        return ((1 - z) *
+//            ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor, zFloor, seed))
+//                + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xBBE05, zFloor, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor + 0xBBE05, zFloor, seed)))
+//            + z *
+//            ((1 - y) * ((1 - x) * hashPart1024(xFloor, yFloor, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor, zFloor + 0xA0F2F, seed))
+//                + y * ((1 - x) * hashPart1024(xFloor, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed) + x * hashPart1024(xFloor + 0xDB4F1, yFloor + 0xBBE05, zFloor + 0xA0F2F, seed)))
+//        ) * 0x1p-10f + 0.5f;
     }
     public float getValueFractal(float x, float y, float z, float w) {
         x *= frequency;
@@ -2803,7 +2804,6 @@ public class Noise {
         final float diff = 0.5f - result;
         final int sign = Float.floatToRawIntBits(diff) >> 31, one = sign | 1;
         return (((result + sign)) / (Float.MIN_VALUE - sign + (result + sharp * diff) * one) - sign - sign) - 1f;
-
     }
 
 

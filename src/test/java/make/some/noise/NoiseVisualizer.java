@@ -50,7 +50,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 
     public static float basicPrepare(float n)
     {
-        return n * 0.5f + 0.5f;
+        return Math.min(Math.max(n * 0.5f + 0.5f, 0f), 1f);
     }
 
     @Override
@@ -183,7 +183,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                             Pixmap p = new Pixmap(256, 256, Pixmap.Format.RGBA8888);
                             for (int x = 0; x < 256; x++) {
                                 for (int y = 0; y < 256; y++) {
-                                    int color = (int) ((noise.getConfiguredNoise(x, y) + 1f) * 127.999f);
+                                    int color = Math.min(Math.max((int) ((noise.getConfiguredNoise(x, y) + 1f) * 127.999f), 0), 255);
                                     p.drawPixel(x, y, color * 0x01010100 | 0xFF);
                                 }
                             }
@@ -195,7 +195,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
                                 Pixmap p = new Pixmap(256, 256, Pixmap.Format.RGBA8888);
                                 for (int x = 0; x < 256; x++) {
                                     for (int y = 0; y < 256; y++) {
-                                        int color = (int) ((noise.getConfiguredNoise(x, y, c) + 1f) * 127.999f);
+                                        int color = Math.min(Math.max((int) ((noise.getConfiguredNoise(x, y, c) + 1f) * 127.999f), 0), 255);
                                         p.drawPixel(x, y, color * 0x01010100 | 0xFF);
                                     }
                                 }
