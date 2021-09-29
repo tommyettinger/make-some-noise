@@ -73,37 +73,37 @@ Of course, this is not without a tradeoff; `MUTANT` noise is the slowest here.
 All are 2D. FRACTAL types use 3 octaves.
 
 - VALUE: 
-  - ![Preview](https://i.imgur.com/At1Hgm5.png)
+  - ![Preview](img/value_2D.png)
 - VALUE_FRACTAL: 
-  - ![Preview](https://i.imgur.com/2b0qBrS.png)
+  - ![Preview](img/valuefractal_2D.png)
 - PERLIN: 
-  - ![Preview](https://i.imgur.com/z9461l1.png)
+  - ![Preview](img/perlin_2D.png)
 - PERLIN_FRACTAL: 
-  - ![Preview](https://i.imgur.com/DPItxKc.png)
+  - ![Preview](img/perlinfractal_2D.png)
 - SIMPLEX: 
-  - ![Preview](https://i.imgur.com/9S7RrYP.png)
+  - ![Preview](img/simplex_2D.png)
 - SIMPLEX_FRACTAL: 
-  - ![Preview](https://i.imgur.com/m73kktY.png)
+  - ![Preview](img/simplexfractal_2D.png)
 - CELLULAR: 
-  - ![Preview](https://i.imgur.com/Nu23Nf5.png)
+  - ![Preview](img/cellular_2D.png)
 - WHITE_NOISE: 
-  - ![Preview](https://i.imgur.com/Sv7uJYW.png)
+  - ![Preview](img/white_2D.png)
 - CUBIC: 
-  - ![Preview](https://i.imgur.com/XpLZiiL.png)
+  - ![Preview](img/cubic_2D.png)
 - CUBIC_FRACTAL: 
-  - ![Preview](https://i.imgur.com/7i9C8ah.png)
+  - ![Preview](img/cubicfractal_2D.png)
 - FOAM: 
-  - ![Preview](https://i.imgur.com/L5iCStQ.png)
+  - ![Preview](img/foam_2D.png)
 - FOAM_FRACTAL: 
-  - ![Preview](https://i.imgur.com/mCuEiAD.png)
+  - ![Preview](img/foamfractal_2D.png)
 - HONEY:
-  - ![Preview](https://i.imgur.com/fKLiF8S.png)
+  - ![Preview](img/honey_2D.png)
 - HONEY_FRACTAL:
-  - ![Preview](https://i.imgur.com/aRw2jLJ.png)
+  - ![Preview](img/honeyfractal_2D.png)
 - MUTANT:
-  - ![Preview](https://i.imgur.com/HKIiTBd.png)
+  - ![Preview](img/mutant_2D.png)
 - MUTANT_FRACTAL:
-  - ![Preview](https://i.imgur.com/a68oG3B.png)
+  - ![Preview](img/mutantfractal_2D.png)
 
 
 ## Some Fractal Type Previews
@@ -112,36 +112,36 @@ All are 2D, using 3 octaves.
 
 - PERLIN_FRACTAL: 
   - FBM
-     - ![Preview](https://i.imgur.com/DPItxKc.png)
+     - ![Preview](img/perlinfractal_2D.png)
   - BILLOW
-     - ![Preview](https://i.imgur.com/6OTR2Xl.png)
+     - ![Preview](img/perlinbillow_2D.png)
   - RIDGED_MULTI
-     - ![Preview](https://i.imgur.com/RyJgRVS.png)
+     - ![Preview](img/perlinridged_2D.png)
 - SIMPLEX_FRACTAL: 
   - FBM
-     - ![Preview](https://i.imgur.com/m73kktY.png)
+     - ![Preview](img/simplexfractal_2D.png)
   - BILLOW
-     - ![Preview](https://i.imgur.com/4zCZ3C0.png)
+     - ![Preview](img/simplexbillow_2D.png)
   - RIDGED_MULTI
-     - ![Preview](https://i.imgur.com/Be8ESjY.png)
+     - ![Preview](img/simplexridged_2D.png)
 - FOAM_FRACTAL: 
   - FBM
-     - ![Preview](https://i.imgur.com/mCuEiAD.png)
+     - ![Preview](img/foamfractal_2D.png)
   - BILLOW
-     - ![Preview](https://i.imgur.com/egJRuzg.png)
+     - ![Preview](img/foambillow_2D.png)
   - RIDGED_MULTI
-     - ![Preview](https://i.imgur.com/2HNBlnD.png)
+     - ![Preview](img/foamridged_2D.png)
 - HONEY_FRACTAL: 
   - FBM
-     - ![Preview](https://i.imgur.com/aRw2jLJ.png)
+     - ![Preview](img/honeyfractal_2D.png)
   - BILLOW
-     - ![Preview](https://i.imgur.com/OyRumgu.png)
+     - ![Preview](img/honeybillow_2D.png)
   - RIDGED_MULTI
-     - ![Preview](https://i.imgur.com/Gtlhg0J.png)
+     - ![Preview](img/honeyridged_2D.png)
 - MUTANT_FRACTAL:
   - FBM
-    - ![Preview](https://i.imgur.com/a68oG3B.png)
+    - ![Preview](img/mutantfractal_2D.png)
   - BILLOW
-    - ![Preview](https://i.imgur.com/idZQYFe.png)
+    - ![Preview](img/mutantbillow_2D.png)
   - RIDGED_MULTI
-    - ![Preview](https://i.imgur.com/5r6gXvk.png)
+    - ![Preview](img/mutantridged_2D.png)
