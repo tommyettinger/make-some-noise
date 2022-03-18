@@ -161,6 +161,7 @@ public class NoiseTests {
 		long state = 12345678901L;
 		float x, y, z, w, u, v, result, xLo=0, yLo=0, zLo=0, wLo=0, uLo=0, vLo=0, xHi=0, yHi=0, zHi=0, wHi=0, uHi=0, vHi=0;
 		float min = 0.5f, max = 0.5f;
+		final int TRIAL_COUNT = NoiseTests.TRIAL_COUNT * 4;
 		for (int i = 0; i < TRIAL_COUNT; i++) {
 			x = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));
 			y = (state >> 58) / (1.001f - (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L >>> 40) * 0x1p-24f));

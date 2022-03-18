@@ -119,7 +119,7 @@ public class NoiseVisualizer extends ApplicationAdapter {
 //                            green.setNoiseType(0);
 //                            blue.setNoiseType(0);
 //                        }
-                        dim = (dim + 1) & 3;
+                        dim = (dim + 1) % 5;
                         break;
                     case F: // frequency
                         noise.setFrequency(noise.getFrequency() * (UIUtils.shift() ? 0.9375f : 1.0625f));
@@ -263,6 +263,19 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     for (int x = 0; x < width; x++) {
                         for (int y = 0; y < height; y++) {
                             renderer.color(basicPrepare(red.getConfiguredNoise(
+                                    x + y, x - y, c, x - c, c - y)),
+                                    basicPrepare(green.getConfiguredNoise(
+                                            x + y, x - y, c, x - c, c - y)),
+                                    basicPrepare(blue.getConfiguredNoise(
+                                            x + y, x - y, c, x - c, c - y)), 1f);
+                            renderer.vertex(x, y, 0);
+                        }
+                    }
+                    break;
+                case 4:
+                    for (int x = 0; x < width; x++) {
+                        for (int y = 0; y < height; y++) {
+                            renderer.color(basicPrepare(red.getConfiguredNoise(
                                 x + c, c - x, y + c,
                                 y - c, x + y, x - y)),
                                     basicPrepare(green.getConfiguredNoise(
@@ -307,13 +320,22 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     for (int x = 0; x < width; x++) {
                         for (int y = 0; y < height; y++) {
                             renderer.color(noise.getConfiguredNoise(
+                                    x + y, x - y, c, x - c, c - y) >= 0f ? WHITE : BLACK);
+                            renderer.vertex(x, y, 0);
+                        }
+                    }
+                    break;
+                case 4:
+                    for (int x = 0; x < width; x++) {
+                        for (int y = 0; y < height; y++) {
+                            renderer.color(noise.getConfiguredNoise(
                                 x + c, c - x, y + c,
                                 y - c, x + y, x - y) >= 0f ? WHITE : BLACK);
                             renderer.vertex(x, y, 0);
                         }
                     }
                     break;
-                
+
             }
         }
         else 
@@ -348,6 +370,16 @@ public class NoiseVisualizer extends ApplicationAdapter {
                     }
                     break;
                 case 3:
+                    for (int x = 0; x < width; x++) {
+                        for (int y = 0; y < height; y++) {
+                            bright = basicPrepare(noise.getConfiguredNoise(
+                                    x + y, x - y, c, x - c, c - y));
+                            renderer.color(bright, bright, bright, 1f);
+                            renderer.vertex(x, y, 0);
+                        }
+                    }
+                    break;
+                case 4:
                     for (int x = 0; x < width; x++) {
                         for (int y = 0; y < height; y++) {
                             bright = basicPrepare(noise.getConfiguredNoise(
