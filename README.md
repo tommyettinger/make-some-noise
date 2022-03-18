@@ -29,7 +29,13 @@ This library is GWT-compatible; if you use this with GWT, add the following to y
 ```xml
 <inherits name='make.some.noise' />
 ```
-
+and also add the following to your `html/build.gradle` `dependencies {}` section:
+```groovy
+dependencies {
+    ...
+    implementation "com.github.tommyettinger:make_some_noise:0.3:sources"
+}
+```
 ## But What Can It Do?
 
 Lots of noise stuff! You can construct a Noise object with some initial configuration (it
