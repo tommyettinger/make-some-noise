@@ -33,7 +33,7 @@ and also add the following to your `html/build.gradle` `dependencies {}` section
 ```groovy
 dependencies {
     ...
-    implementation "com.github.tommyettinger:make_some_noise:0.3:sources"
+    implementation "com.github.tommyettinger:make_some_noise:0.4:sources"
 }
 ```
 ## But What Can It Do?
