@@ -9,19 +9,17 @@ don't need to edit this code, you can use a JAR from the Releases tab, or get th
 or Gradle dependency from Maven Central:
 
 For Maven,
-
 ```xml
 <dependency>
   <groupId>com.github.tommyettinger</groupId>
   <artifactId>make_some_noise</artifactId>
-  <version>0.3</version>
+  <version>0.4</version>
 </dependency>
 ```
 
 or for Gradle,
-
 ```groovy
-implementation "com.github.tommyettinger:make_some_noise:0.3"
+implementation "com.github.tommyettinger:make_some_noise:0.4"
 ```
 (You may need to change `implementation` to `api` or the older `compile` for some projects.)
 
@@ -29,6 +27,12 @@ This library is GWT-compatible; if you use this with GWT, add the following to y
 ```xml
 <inherits name='make.some.noise' />
 ```
+
+You also need to add the sources as a dependency of your HTML project if you use GWT:
+```groovy
+implementation "com.github.tommyettinger:make_some_noise:0.4:sources"
+```
+
 
 ## But What Can It Do?
 
