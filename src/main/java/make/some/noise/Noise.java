@@ -2629,7 +2629,7 @@ public class Noise {
         final float result = (a + b + c) * F3f;
         final float sharp = foamSharpness * 2.2f;
         final float diff = 0.5f - result;
-        final int sign = Float.floatToRawIntBits(diff) >> 31, one = sign | 1;
+        final int sign = Float.floatToIntBits(diff) >> 31, one = sign | 1;
         return (((result + sign)) / (Float.MIN_VALUE - sign + (result + sharp * diff) * one) - sign - sign) - 1f;
     }
 
@@ -2800,7 +2800,7 @@ public class Noise {
         final float result = (a + b + c + d) * 0.25f;
         final float sharp = foamSharpness * 3.3f;
         final float diff = 0.5f - result;
-        final int sign = Float.floatToRawIntBits(diff) >> 31, one = sign | 1;
+        final int sign = Float.floatToIntBits(diff) >> 31, one = sign | 1;
         return (((result + sign)) / (Float.MIN_VALUE - sign + (result + sharp * diff) * one) - sign - sign) - 1f;
 
     }
@@ -2905,7 +2905,7 @@ public class Noise {
         final float result = (a + b + c + d + e) * 0.2f;
         final float sharp = foamSharpness * 4.4f;
         final float diff = 0.5f - result;
-        final int sign = Float.floatToRawIntBits(diff) >> 31, one = sign | 1;
+        final int sign = Float.floatToIntBits(diff) >> 31, one = sign | 1;
         return (((result + sign)) / (Float.MIN_VALUE - sign + (result + sharp * diff) * one) - sign - sign) - 1f;
     }
     public float getFoamFractal(float x, float y, float z, float w, float u) {
@@ -3043,7 +3043,7 @@ public class Noise {
         final float result = (a + b + c + d + e + f) * 0.16666666666666666f;
         final float sharp = foamSharpness * 5.5f;
         final float diff = 0.5f - result;
-        final int sign = Float.floatToRawIntBits(diff) >> 31, one = sign | 1;
+        final int sign = Float.floatToIntBits(diff) >> 31, one = sign | 1;
         return (((result + sign)) / (Float.MIN_VALUE - sign + (result + sharp * diff) * one) - sign - sign) - 1f;
 
     }
@@ -3201,7 +3201,7 @@ public class Noise {
         final float result = (a + b + c + d + e + f + g) * 0.14285714285714285f;
         final float sharp = foamSharpness * 6.6f;
         final float diff = 0.5f - result;
-        final int sign = Float.floatToRawIntBits(diff) >> 31, one = sign | 1;
+        final int sign = Float.floatToIntBits(diff) >> 31, one = sign | 1;
         return (((result + sign)) / (Float.MIN_VALUE - sign + (result + sharp * diff) * one) - sign - sign) - 1f;
     }
 
@@ -3349,7 +3349,7 @@ public class Noise {
         final float result = (a + b + c + d + e + f + g + h) * 0.125f;
         final float sharp = foamSharpness * 7.7f;
         final float diff = 0.5f - result;
-        final int sign = Float.floatToRawIntBits(diff) >> 31, one = sign | 1;
+        final int sign = Float.floatToIntBits(diff) >> 31, one = sign | 1;
         return (((result + sign)) / (Float.MIN_VALUE - sign + (result + sharp * diff) * one) - sign - sign) - 1f;
     }
 
